@@ -206,7 +206,13 @@ def mp_detail(raw: dict[str, Any]) -> dict[str, Any]:
 def assertion_row(raw: dict[str, Any], mode: str = "compact") -> dict[str, Any]:
     """An assertion at one response_mode; the classification axes stay separate."""
     if mode == "minimal":
-        return {"id": raw.get("id"), "name": raw.get("name"), **classification(raw)}
+        return {
+            "id": raw.get("id"),
+            "name": raw.get("name"),
+            "status": raw.get("status"),
+            "assertion_type": raw.get("assertionType"),
+            **classification(raw),
+        }
     out = {
         "id": raw.get("id"),
         "name": raw.get("name"),
@@ -232,6 +238,7 @@ def evidence_row(raw: dict[str, Any], mode: str = "compact") -> dict[str, Any]:
         return {
             "id": raw.get("id"),
             "name": raw.get("name"),
+            "status": raw.get("status"),
             "evidence_type": raw.get("evidenceType"),
             "evidence_level": raw.get("evidenceLevel"),
             "significance": raw.get("significance"),

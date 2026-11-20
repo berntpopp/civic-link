@@ -153,6 +153,16 @@ async def test_standard_mode_fences_the_evidence_statement(civic_service: CivicS
     assert statement["kind"] == "untrusted_text" and statement["provenance"]["source"] == "civic"
 
 
+async def test_minimal_rows_keep_curation_status(civic_service: CivicService) -> None:
+    """status=ALL mixes ACCEPTED/SUBMITTED/REJECTED: even minimal rows must say which."""
+    out = await civic_service.search_evidence_items(
+        molecular_profile_id=12, response_mode="minimal"
+    )
+    assert out["evidence_items"][0]["status"] == "ACCEPTED"
+    out = await civic_service.search_assertions(molecular_profile_id=12, response_mode="minimal")
+    assert {"status", "assertion_type"} <= out["assertions"][0].keys()
+
+
 async def test_empty_evidence_is_no_civic_evidence_found(civic_service: CivicService) -> None:
     out = await civic_service.search_evidence_items(
         molecular_profile_id=79, evidence_type="PREDISPOSING"
