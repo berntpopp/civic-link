@@ -65,6 +65,18 @@ async def test_assertion_and_evidence_ids_accept_civic_prefixes(
     assert out["evidence_item"]["source"]["citation_id"] == "24583796"
 
 
+async def test_malformed_prefixed_id_names_the_argument_and_its_forms(facade: Any) -> None:
+    for tool, arg, prefix in (
+        ("get_evidence_item", "evidence_id", "EID"),
+        ("get_assertion", "assertion_id", "AID"),
+    ):
+        res = await _raw(facade, tool, {arg: "EIDabc"})
+        body = res.structured_content
+        assert res.is_error is True and body["field"] == arg
+        assert "argument names" not in body["message"] and arg not in body["allowed_values"]
+        assert prefix in body["message"]  # the string form, not just the integer range
+
+
 async def test_evidence_paging_suggests_next_page(facade: Any, call_tool: Any) -> None:
     out = await call_tool(facade, "search_evidence_items", {"molecular_profile_id": 12})
     assert out["_meta"]["next_commands"][0] == {
@@ -104,12 +116,24 @@ async def test_foreign_gene_id_is_rejected_with_a_converter(facade: Any) -> None
     assert body["_meta"]["next_commands"] == [
         {"tool": "hgnc_resolve_symbol", "arguments": {"query": "ENSG00000133703"}}
     ]
+    assert "not a tool of this server" in body["hint"]  # standalone callers lack it
 
 
 async def test_capabilities_and_diagnostics(facade: Any, call_tool: Any) -> None:
     caps = await call_tool(facade, "get_server_capabilities", {})
     assert caps["tools"] == TOOLS and caps["research_use_only"] is True
     assert "CC0" in caps["license"] and "28138153" in caps["recommended_citation"]
+    async with Client(facade) as client:
+        schemas = {t.name: t.input_schema["properties"] for t in await client.list_tools()}
+    paged = {name: props["limit"] for name, props in schemas.items() if "limit" in props}
+    # contract truth: the advertised per-tool limits are the schema's own
+    assert caps["limits"]["per_tool"] == {
+        name: {
+            "default": int(lim["description"].split("default ")[1].split(",")[0]),
+            "max": lim["maximum"],
+        }
+        for name, lim in paged.items()
+    }
     diag = await call_tool(facade, "get_diagnostics", {})
     assert diag["upstream"]["base_url"] == "https://civicdb.org"
 
@@ -118,7 +142,7 @@ async def test_descriptions_name_only_returned_fields(facade: Any, call_tool: An
     """Contract truth: the fields a description promises are in the response."""
     found = await call_tool(facade, "search_molecular_profiles", {"query": "BRAF V600E"})
     assert {"exact_match", "simple", "complex"} <= set(found)
-    assert {"id", "name", "kind"} <= set(found["simple"][0])
+    assert {"id", "name", "accepted_evidence_count"} <= set(found["simple"][0])
     mp = await call_tool(facade, "get_molecular_profile", {"molecular_profile_id": 79})
     assert {"evidence_note", "assertions"} <= set(mp)
     variant = (await call_tool(facade, "get_variant", {"variant_id": 12}))["variant"]

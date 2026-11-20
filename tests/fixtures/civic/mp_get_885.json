@@ -1,0 +1,67 @@
+{
+ "data": {
+  "accepted_diagnostic": {
+   "totalCount": 0
+  },
+  "accepted_functional": {
+   "totalCount": 0
+  },
+  "accepted_oncogenic": {
+   "totalCount": 0
+  },
+  "accepted_predictive": {
+   "totalCount": 0
+  },
+  "accepted_predisposing": {
+   "totalCount": 0
+  },
+  "accepted_prognostic": {
+   "totalCount": 0
+  },
+  "molecularProfile": {
+   "assertions": {
+    "nodes": [],
+    "totalCount": 0
+   },
+   "deprecated": false,
+   "description": null,
+   "evidenceCountsByStatus": {
+    "acceptedCount": 0,
+    "submittedCount": 4
+   },
+   "id": 885,
+   "isComplex": false,
+   "link": "/molecular-profiles/885",
+   "molecularProfileAliases": [
+    "RS121913535",
+    "GLY13CYS"
+   ],
+   "molecularProfileScore": 0.0,
+   "name": "KRAS G13C",
+   "variants": [
+    {
+     "__typename": "GeneVariant",
+     "feature": {
+      "id": 30,
+      "name": "KRAS"
+     },
+     "id": 911,
+     "name": "G13C"
+    }
+   ]
+  },
+  "rejected_assertions": {
+   "nodes": [],
+   "totalCount": 0
+  },
+  "status_accepted": {
+   "totalCount": 0
+  },
+  "status_rejected": {
+   "totalCount": 1
+  },
+  "status_submitted": {
+   "totalCount": 4
+  }
+ }
+}

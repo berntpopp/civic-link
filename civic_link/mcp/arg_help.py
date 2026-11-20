@@ -87,7 +87,13 @@ def describe_constraints(field_schema: Mapping[str, Any]) -> tuple[list[str], st
     if lo is not None or hi is not None:
         lo_s = str(int(lo)) if lo is not None else "?"
         hi_s = str(int(hi)) if hi is not None else "?"
-        return [f"{lo_s}..{hi_s}"], f"must be between {lo_s} and {hi_s}"
+        allowed, phrase = [f"{lo_s}..{hi_s}"], f"must be between {lo_s} and {hi_s}"
+        # an int-or-string union (evidence_id: 95 or 'EID95') names its string form too
+        patterns = [n["pattern"] for n in nodes if isinstance(n, Mapping) and n.get("pattern")]
+        if patterns:
+            allowed.append(f"string matching {patterns[0]}")
+            phrase = f"{phrase}, or a string matching {patterns[0]}"
+        return allowed, phrase
     min_items: Any = None
     max_items: Any = None
     for node in nodes:

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "civic-link"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server for CIViC (Clinical Interpretation of Variants in Cancer): molecular profiles, variants, evidence items and assertions via the live CIViC GraphQL API (research use only)"
 readme = "README.md"
 license = { text = "MIT" }

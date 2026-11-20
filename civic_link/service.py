@@ -10,7 +10,6 @@ silent empty list. A genuinely empty evidence answer is a success that says
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime
 from typing import Any
 
 from civic_link import queries as Q
@@ -21,26 +20,38 @@ from civic_link.shaping import (
     CAID,
     CLINVAR,
     COMPLEX_NOTE,
+    COUNTS_NOTE,
     DOID_RE,
     FOREIGN_GENE,
+    FOREIGN_GENE_HINT,
     HGVS,
+    MP_MISS_HINT,
     NCBI_GENE,
     NCIT_RE,
-    NO_ASSERTION,
     NO_EVIDENCE,
     NOT_A_REPORT,
+    P_DOT,
+    ROUTER_ONLY,
     SITE,
     SYMBOL,
     WS,
     VariantIndex,
+    assertion_evidence,
     assertion_row,
     cursor,
     evidence_row,
     fence,
+    gene_detail,
+    gene_variant,
     hgvs_key,
+    kind_totals,
+    level_counts,
+    match_notes,
     mp_detail,
     mp_row,
+    now_iso,
     page_block,
+    profile_note,
     variant_detail,
     variant_index,
 )
@@ -55,10 +66,6 @@ VARIANT_INDEX_PATH = "/downloads/nightly/nightly-VariantSummaries.tsv"
 VARIANT_INDEX_TTL_S = 86_400.0
 
 
-def _now() -> str:
-    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
-
-
 def _page_args(limit: int, offset: int, maximum: int) -> None:
     if not 1 <= limit <= min(maximum, UPSTREAM_PAGE_CAP):
         raise InvalidInputError(f"`limit` must be 1-{maximum}.", field="limit")
@@ -67,6 +74,8 @@ def _page_args(limit: int, offset: int, maximum: int) -> None:
 
 
 _PAGING_FIELDS = {"first": "limit", "after": "offset"}
+#: An unknown ID's own browse tool (no arguments needed); profiles/variants need a query.
+_BROWSE = {"evidence_id": ("search_evidence_items",), "assertion_id": ("search_assertions",)}
 
 
 def _named(**values: Any) -> dict[str, Any]:
@@ -88,7 +97,7 @@ class CivicService:
         return next((n for n in names if n and n != "nightly"), None)
 
     async def _stamp(self, payload: dict[str, Any]) -> dict[str, Any]:
-        now = _now()
+        now = now_iso()
         payload["data_version"] = f"CIViC {await self.release()}; live:{now}"
         payload["retrieved_at"] = now
         payload["disclaimer"] = NOT_A_REPORT
@@ -115,7 +124,10 @@ class CivicService:
             raise NotFoundError(
                 "No CIViC disease matches `disease`.",
                 field="disease",
-                hint="Give a DOID (DOID:1909) or a disease name as CIViC writes it (Melanoma).",
+                hint=(
+                    "Give a DOID (DOID:1909) or a disease name as CIViC writes it (Melanoma). "
+                    + ROUTER_ONLY.format(tool="mondo_resolve_disease")
+                ),
                 next_commands=[cmd("mondo_resolve_disease", query=disease.strip())],
             )
         if match:
@@ -178,28 +190,36 @@ class CivicService:
             if hits:
                 variant_id = variables["variant_id"] = hits[0]["variant_id"]
         else:
-            kind, variables["name"] = "name", term
-        found: dict[str, Any] = {}
+            kind, variables["name"] = "name", P_DOT.sub("", term)
+        data: dict[str, Any] = {}
         if kind == "name" or "caid" in variables or variant_id is not None:
-            found = (await self.client.graphql(Q.MP_SEARCH, variables, fields=_PAGING_FIELDS))[
-                "molecularProfiles"
-            ] or {}
+            data = await self.client.graphql(Q.MP_SEARCH, variables, fields=_PAGING_FIELDS)
+        found = data.get("molecularProfiles") or {}
         total = int(found.get("totalCount") or 0)
         if total == 0:
             raise self._mp_miss(term, kind)
         rows = [mp_row(n) for n in found.get("nodes") or []]
+        # the list a row sits in says its kind; dropping it per row saves tokens
+        split: dict[str, list[dict[str, Any]]] = {"simple": [], "complex": []}
+        for r in rows:
+            split[r.pop("kind")].append(r)
+        name = variables.get("name", term)
         payload: dict[str, Any] = {
             "query": term,
             "query_type": kind,
-            "exact_match": self._exact(term, kind, found.get("nodes") or [], variant_id),
-            "simple": [r for r in rows if r["kind"] == "simple"],
-            "complex": [r for r in rows if r["kind"] == "complex"],
+            "exact_match": self._exact(name, kind, found.get("nodes") or [], variant_id),
+            **split,
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
+            **kind_totals(data, total),
         }
+        if name != term:
+            payload["query_normalized"] = name
         if variant_id is not None:
             payload["variant_id"] = variant_id
-        if payload["complex"]:
-            payload["complex_note"] = COMPLEX_NOTE
+        if offset == 0:  # fixed notes once, on the first page
+            payload["counts_note"] = COUNTS_NOTE
+            if payload["complex"] or total > len(rows):  # complex rows here or on later pages
+                payload["complex_note"] = COMPLEX_NOTE
         return await self._stamp(payload)
 
     @staticmethod
@@ -218,44 +238,42 @@ class CivicService:
 
     @staticmethod
     def _mp_miss(term: str, kind: str) -> NotFoundError:
-        steps = []
         gene = term.split(" ")[0]
-        if kind == "name" and SYMBOL.fullmatch(gene):
-            steps.append(cmd("get_gene", gene=gene))
+        steps = [cmd("get_gene", gene=gene)] if kind == "name" and SYMBOL.fullmatch(gene) else []
         return NotFoundError(
             "No CIViC molecular profile matches this query.",
             field="query",
-            hint=(
-                "Search by gene and variant as CIViC names them (BRAF V600E), a ClinGen CAID "
-                "(CA123643), a ClinVar variation ID (376069) or an HGVS string. get_gene lists "
-                "every variant CIViC curates for a gene. No CIViC profile is not evidence that "
-                "a variant is benign or not actionable."
-            ),
+            hint=MP_MISS_HINT,
             candidates=[],
             next_commands=steps or [cmd("get_server_capabilities")],
         )
 
     async def get_molecular_profile(self, molecular_profile_id: int) -> dict[str, Any]:
         """One profile: component variants, evidence counts and its assertions."""
-        raw = (
-            await self.client.graphql(Q.MP_GET, {"molecular_profile_id": molecular_profile_id})
-        ).get("molecularProfile")
+        data = await self.client.graphql(Q.MP_GET, {"molecular_profile_id": molecular_profile_id})
+        raw = data.get("molecularProfile")
         if not raw:
             raise self._missing("molecular_profile_id", "molecular profile")
-        status = raw.get("evidenceCountsByStatus") or {}
+        detail = mp_detail(raw, data)
         conn = raw.get("assertions") or {}
-        assertions = [assertion_row(a, "compact") for a in conn.get("nodes") or []]
-        accepted_assertions = [a for a in assertions if a["status"] == "ACCEPTED"]
+        rejected = data.get("rejected_assertions") or {}  # absent from conn upstream
+        rows = [assertion_row(a, "compact") for c in (conn, rejected) for a in c.get("nodes") or []]
+        total = (conn.get("totalCount") or 0) + (rejected.get("totalCount") or 0)
+        # ACCEPTED in full (as search_assertions defaults); unreviewed/rejected as stubs only
+        accepted_assertions = [a for a in rows if a["status"] == "ACCEPTED"]
+        stub = ("id", "name", "status", "assertion_type")
+        others = [{k: a[k] for k in stub} for a in rows if a["status"] != "ACCEPTED"]
         payload: dict[str, Any] = {
-            "molecular_profile": mp_detail(raw),
-            "assertions": assertions,
-            "assertions_total": conn.get("totalCount", len(assertions)),
-            "assertions_truncated": (conn.get("totalCount") or 0) > len(assertions),
+            "molecular_profile": detail,
+            "assertions": accepted_assertions,
+            "other_assertions": others,
+            "assertions_total": total,
+            "assertions_truncated": total > len(rows),
         }
         if raw.get("isComplex"):
             payload["complex_note"] = COMPLEX_NOTE
         if not accepted_assertions:
-            payload["evidence_note"] = NO_ASSERTION if status.get("acceptedCount") else NO_EVIDENCE
+            payload["evidence_note"] = profile_note(detail["evidence_counts_by_status"])
         return await self._stamp(payload)
 
     @staticmethod
@@ -264,7 +282,7 @@ class CivicService:
             f"No CIViC {what} has this `{field}`.",
             field=field,
             hint="Find IDs with search_molecular_profiles(query) or get_gene(gene).",
-            next_commands=[cmd("search_molecular_profiles", query="BRAF V600E")],
+            next_commands=[cmd(t) for t in _BROWSE.get(field, ())],
         )
 
     async def get_variant(self, variant_id: int) -> dict[str, Any]:
@@ -294,14 +312,11 @@ class CivicService:
             "first": limit,
             "after": cursor(offset),
         }
-        fields = {
-            **_PAGING_FIELDS,
-            "disease_name": "disease",
-            "disease_id": "disease",
-            "therapy_name": "therapy",
-            "therapy_id": "therapy",
+        fields = _PAGING_FIELDS | {
+            f"{k}_{s}": k for k in ("disease", "therapy") for s in ("name", "id")
         }
-        conn = (await self.client.graphql(document, variables, fields=fields)).get(root) or {}
+        data = await self.client.graphql(document, variables, fields=fields)
+        conn = data.get(root) or {}
         total = int(conn.get("totalCount") or 0)
         mp_id = args.get("molecular_profile_id")
         if total == 0 and mp_id is not None:  # an unknown profile is not_found, not "none"
@@ -314,6 +329,10 @@ class CivicService:
             key: rows,
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
         }
+        if notes := match_notes(filters):
+            payload["match_notes"] = notes
+        if levels := level_counts(data):
+            payload["counts_by_level"] = levels
         if total == 0:
             payload["evidence_note"] = NO_EVIDENCE
         return await self._stamp(payload)
@@ -420,7 +439,7 @@ class CivicService:
         item["phenotypes"] = [
             {"hpo": p.get("hpoId"), "name": p.get("name")} for p in raw.get("phenotypes") or []
         ]
-        item["evidence_items"] = raw.get("evidenceItems") or []
+        item["evidence_items"] = [assertion_evidence(e) for e in raw.get("evidenceItems") or []]
         item["evidence_items_count"] = raw.get("evidenceItemsCount")
         item["url"] = SITE + str(raw.get("link") or "")
         return await self._stamp({"assertion": item})
@@ -433,12 +452,11 @@ class CivicService:
         value = gene.strip()
         if FOREIGN_GENE.fullmatch(value):
             raise InvalidInputError(
-                "`gene` takes an HGNC symbol or an NCBI Gene ID; CIViC has no Ensembl or "
-                "HGNC ID lookup.",
+                "`gene` takes a symbol or NCBI Gene ID; CIViC has no Ensembl or HGNC ID lookup.",
                 field="gene",
                 allowed_values=["HGNC symbol (BRAF)", "NCBI Gene ID (NCBIGene:673 or 673)"],
+                hint=FOREIGN_GENE_HINT,
                 next_commands=[cmd("hgnc_resolve_symbol", query=value)],
-                recovery_action="reformulate_input",
             )
         entrez = NCBI_GENE.fullmatch(value)
         if not entrez and not SYMBOL.fullmatch(value):
@@ -460,30 +478,16 @@ class CivicService:
             raise NotFoundError(
                 "CIViC curates no gene with this `gene`.",
                 field="gene",
-                hint="CIViC covers ~750 cancer genes; check the symbol with hgnc_resolve_symbol.",
+                hint="CIViC covers ~750 cancer genes; check the symbol. "
+                + ROUTER_ONLY.format(tool="hgnc_resolve_symbol"),
                 next_commands=[cmd("hgnc_resolve_symbol", query=value)],
             )
         raw = nodes[0]
         conn = raw.get("variants") or {}
-        variants = [
-            {
-                "id": v.get("id"),
-                "name": v.get("name"),
-                "single_variant_molecular_profile_id": v.get("singleVariantMolecularProfileId"),
-            }
-            for v in conn.get("nodes") or []
-        ]
+        variants = [gene_variant(v) for v in conn.get("nodes") or []]
         return await self._stamp(
             {
-                "gene": {
-                    "id": raw.get("id"),
-                    "symbol": raw.get("name"),
-                    "full_name": raw.get("fullName"),
-                    "entrez_id": raw.get("entrezId"),
-                    "aliases": raw.get("featureAliases") or [],
-                    "description": fence(raw.get("description"), str(raw.get("name"))),
-                    "url": SITE + str(raw.get("link") or ""),
-                },
+                "gene": gene_detail(raw, first_page=offset == 0),
                 "variants": variants,
                 **page_block(
                     total=int(conn.get("totalCount") or 0),

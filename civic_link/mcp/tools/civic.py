@@ -112,7 +112,8 @@ def register_civic_tools(mcp: FastMCP) -> None:
             "name (BRAF V600E), a ClinGen CAID (CA123643), a ClinVar variation ID (376069) or "
             "an HGVS string, and return exact_match (the single-variant profile) plus "
             "`simple` and `complex` lists kept apart: a complex profile (V600E AND MSI Low) "
-            "only applies to that combination. Each row: id, name, kind, evidence counts. "
+            "only applies to that combination. Each row: id, name, evidence counts; "
+            "simple_total and complex_total count the whole result. "
             "Start here. Signature: search_molecular_profiles(query, limit=, offset=)."
         ),
     )
@@ -156,10 +157,11 @@ def register_civic_tools(mcp: FastMCP) -> None:
         output_schema=None,
         tags={"profiles"},
         description=(
-            "Return one molecular profile: its variants, kind (simple/complex), evidence "
-            "counts by status and type, and its assertions, each with actionability (AMP "
-            "tier/level), oncogenicity or germline_pathogenicity as separate fields and a "
-            "DOID disease. evidence_note flags a profile without an accepted assertion: no "
+            "Return one molecular profile: its variants, kind (simple/complex), live evidence "
+            "counts by status (and accepted by type), its ACCEPTED assertions, each with "
+            "actionability (AMP tier/level), oncogenicity or germline_pathogenicity as separate "
+            "fields and a DOID disease, and other_assertions (submitted/rejected: id and status "
+            "only). evidence_note flags a profile without an accepted assertion: no "
             "CIViC evidence is not 'not actionable'. "
             "Signature: get_molecular_profile(molecular_profile_id)."
         ),
@@ -212,8 +214,8 @@ def register_civic_tools(mcp: FastMCP) -> None:
             "ALL given filters: molecular_profile_id, disease, therapy, evidence_type, "
             "evidence_level (A validated .. E inferential), significance, status (ACCEPTED "
             "by default). Rows: type, level, direction, significance, rating, DOID disease, "
-            "therapies (NCIt), source PMID. `total` is exact; zero rows says no CIViC "
-            "evidence found. Signature: search_evidence_items(molecular_profile_id=, "
+            "therapies (NCIt), source PMID. `total` is exact and counts_by_level splits it "
+            "by level; zero rows says no CIViC evidence found. Signature: search_evidence_items(molecular_profile_id=, "
             "disease=, therapy=, evidence_type=, evidence_level=, significance=, status=, "
             "response_mode=, limit=, offset=)."
         ),
@@ -419,7 +421,8 @@ def register_civic_tools(mcp: FastMCP) -> None:
             "Return one assertion: type, direction, actionability (AMP tier/level, FDA "
             "companion test, regulatory approval, NCCN guideline) or oncogenicity / "
             "germline_pathogenicity with their codes, DOID disease, therapies, the fenced "
-            "summary and description, and the evidence items behind it. "
+            "summary and description, and the evidence items behind it (status, level, "
+            "molecular profile, PMID). "
             "Signature: get_assertion(assertion_id)."
         ),
     )

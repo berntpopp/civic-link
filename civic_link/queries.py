@@ -26,6 +26,8 @@ query MpSearch($name: String, $caid: String, $variant_id: Int, $first: Int, $aft
     totalCount
     nodes {{ {_MP_ROW} }}
   }}
+  kinds: molecularProfiles(name: $name, alleleRegistryId: $caid, variantId: $variant_id,
+                           first: 100) {{ nodes {{ isComplex }} }}
 }}
 """
 
@@ -36,18 +38,32 @@ _ASSERTION_ROW = f"""
   {_DISEASE} {_THERAPIES} therapyInteractionType {_MP_REF} summary
 """
 
+# CIViC's per-profile evidence counters lag its live list (MP12: 96 vs 97 accepted), so
+# get_molecular_profile counts the list itself: one aliased totalCount per status/type.
+_EV = "evidenceItems(molecularProfileId: $molecular_profile_id, status: {s}{t}) {{ totalCount }}"
+_TYPES = ("PREDICTIVE", "DIAGNOSTIC", "PROGNOSTIC", "ONCOGENIC", "FUNCTIONAL", "PREDISPOSING")
+_LIVE_COUNTS = "\n".join(
+    [
+        f"  status_{s.lower()}: " + _EV.format(s=s, t="")
+        for s in ("ACCEPTED", "SUBMITTED", "REJECTED")
+    ]
+    + [
+        f"  accepted_{t.lower()}: " + _EV.format(s="ACCEPTED", t=f", evidenceType: {t}")
+        for t in _TYPES
+    ]
+)
+
 MP_GET = f"""
 query MpGet($molecular_profile_id: Int!) {{
   molecularProfile(id: $molecular_profile_id) {{
     {_MP_ROW} molecularProfileScore description link
     variants {{ __typename id name feature {{ id name }} }}
-    evidenceCountsByStatus {{ acceptedCount submittedCount rejectedCount }}
-    evidenceCountsByType {{
-      predictiveCount diagnosticCount prognosticCount oncogenicCount functionalCount
-      predisposingCount
-    }}
     assertions(first: 100) {{ totalCount nodes {{ {_ASSERTION_ROW} }} }}
   }}
+  # the profile's assertions connection silently omits REJECTED ones
+  rejected_assertions: assertions(molecularProfileId: $molecular_profile_id, status: REJECTED,
+                                  first: 100) {{ totalCount nodes {{ {_ASSERTION_ROW} }} }}
+{_LIVE_COUNTS}
 }}
 """
 
@@ -84,6 +100,15 @@ _EVIDENCE_ROW = f"""
   source {{ sourceType citationId citation }}
 """
 
+# Per-level totals for the same filters (any level), so a breakdown needs no paging.
+_EV_FILTERS = """molecularProfileId: $molecular_profile_id, diseaseName: $disease_name,
+    diseaseId: $disease_id, therapyName: $therapy_name, therapyId: $therapy_id,
+    evidenceType: $evidence_type, significance: $significance, status: $status"""
+_LEVEL_COUNTS = "\n".join(
+    f"  level_{lv}: evidenceItems({_EV_FILTERS}, evidenceLevel: {lv}) {{ totalCount }}"
+    for lv in "ABCDE"
+)
+
 EVIDENCE_SEARCH = f"""
 query EvidenceSearch($molecular_profile_id: Int, $disease_name: String, $disease_id: Int,
   $therapy_name: String, $therapy_id: Int, $evidence_type: EvidenceType,
@@ -96,6 +121,7 @@ query EvidenceSearch($molecular_profile_id: Int, $disease_name: String, $disease
     totalCount
     nodes {{ {_EVIDENCE_ROW} description }}
   }}
+{_LEVEL_COUNTS}
 }}
 """
 
@@ -129,7 +155,8 @@ query AssertionGet($assertion_id: Int!) {{
   assertion(id: $assertion_id) {{
     {_ASSERTION_ROW} description link
     phenotypes {{ hpoId name }}
-    evidenceItemsCount evidenceItems {{ id name }}
+    evidenceItemsCount
+    evidenceItems {{ id name status evidenceLevel {_MP_REF} source {{ sourceType citationId }} }}
   }}
 }}
 """

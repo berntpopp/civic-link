@@ -11,6 +11,7 @@ import respx
 from civic_link.api.client import GRAPHQL_PATH
 from civic_link.exceptions import AmbiguousQueryError, InvalidInputError, NotFoundError
 from civic_link.service import CivicService
+from civic_link.shaping import CODE_MATCH, NAME_MATCH, NO_ACCEPTED
 
 
 def _sent(router: respx.MockRouter, op: str) -> list[dict[str, object]]:
@@ -25,12 +26,24 @@ async def test_name_search_keeps_complex_profiles_out_of_the_simple_answer(
     out = await civic_service.search_molecular_profiles("BRAF  V600E", 25, 0)
     assert out["query_type"] == "name" and out["exact_match"] == {"id": 12, "name": "BRAF V600E"}
     assert [r["id"] for r in out["simple"]] == [12, 685]
-    assert out["complex"] and {r["kind"] for r in out["complex"]} == {"complex"}
+    assert out["complex"] and not {"kind"} & {k for r in out["simple"] + out["complex"] for k in r}
     assert not {r["id"] for r in out["complex"]} & {r["id"] for r in out["simple"]}
     assert "combination" in out["complex_note"]
     # honest paging from CIViC's own totalCount (41 profiles mention BRAF V600E)
     assert out["total"] == 41 and out["returned"] == 25
     assert out["truncated"] is True and out["next_offset"] == 25
+    # whole-result split, so counting complex profiles needs no paging (total <= 100)
+    assert out["simple_total"] == 2 and out["complex_total"] == 39
+    # the fixed notes ride on the first page only; later pages carry rows and paging
+    later = await civic_service.search_molecular_profiles("BRAF V600E", 25, 25)
+    assert "complex_note" not in later and "counts_note" not in later
+
+
+async def test_protein_prefix_in_a_name_query_is_dropped(civic_service: CivicService) -> None:
+    out = await civic_service.search_molecular_profiles("BRAF p.V600E", 25, 0)
+    assert out["exact_match"] == {"id": 12, "name": "BRAF V600E"}
+    assert out["query"] == "BRAF p.V600E" and out["query_normalized"] == "BRAF V600E"
+    assert "cached" in out["counts_note"]
 
 
 @pytest.mark.parametrize(
@@ -39,6 +52,7 @@ async def test_name_search_keeps_complex_profiles_out_of_the_simple_answer(
         ("CA123643", "caid"),
         ("376069", "clinvar"),
         ("VCV000376069", "clinvar"),
+        ("ClinVar:376069", "clinvar"),  # CURIE form
         ("NC_000007.14:g.140753336A>T", "hgvs"),
         ("nm_004333:c.1799T>A", "hgvs"),  # case and accession version are ignored
     ],
@@ -84,12 +98,22 @@ async def test_molecular_profile_keeps_actionability_and_oncogenicity_apart(
 ) -> None:
     out = await civic_service.get_molecular_profile(12)
     mp = out["molecular_profile"]
-    assert mp["kind"] == "simple" and mp["evidence_counts_by_status"]["accepted"] == 96
+    # live list totals, not CIViC's cached counters (which said 96/119/9)
+    assert mp["evidence_counts_by_status"] == {"accepted": 97, "submitted": 121, "rejected": 9}
+    assert mp["kind"] == "simple" and mp["evidence_counts_by_type_accepted"]["predictive"] == 76
+    assert {a["status"] for a in out["assertions"]} == {"ACCEPTED"}
+    # CIViC's profile.assertions omits REJECTED ones; the root query adds them back (AID12)
+    assert {a["status"] for a in out["other_assertions"]} == {"SUBMITTED", "REJECTED"}
+    assert {"id": 12, "name": "AID12", "status": "REJECTED", "assertion_type": "PREDICTIVE"} in (
+        out["other_assertions"]
+    )
+    assert out["other_assertions"][0].keys() == {"id", "name", "status", "assertion_type"}
     aid10 = next(a for a in out["assertions"] if a["name"] == "AID10")
     assert aid10["actionability"]["amp_tier_level"] == "TIER_I_LEVEL_A"
     assert aid10["oncogenicity"] is None and aid10["germline_pathogenicity"] is None
     assert aid10["disease"] == {"name": "Melanoma", "doid": "DOID:1909"}
-    assert out["assertions_total"] == 11 and out["assertions_truncated"] is False
+    assert out["assertions_total"] == 12 and len(out["assertions"]) == 6
+    assert out["assertions_truncated"] is False
     assert "evidence_note" not in out
     assert out["data_version"].startswith("CIViC 01-Nov-2026; live:")
     assert mp["description"]["kind"] == "untrusted_text"
@@ -101,6 +125,12 @@ async def test_profile_without_assertions_says_no_civic_evidence_not_not_actiona
     out = await civic_service.get_molecular_profile(79)  # KRAS G12D: EIDs, no assertion
     assert out["assertions"] == []
     assert out["evidence_note"].startswith("No accepted CIViC assertion")
+
+
+async def test_unreviewed_evidence_only_is_not_no_evidence(civic_service: CivicService) -> None:
+    out = await civic_service.get_molecular_profile(885)  # KRAS G13C: 4 submitted, 1 rejected
+    assert out["evidence_note"] == NO_ACCEPTED.format(n=5)
+    assert out["evidence_note"].startswith("No accepted CIViC evidence")
 
 
 async def test_unknown_ids_are_not_found_naming_the_parameter(
@@ -116,6 +146,9 @@ async def test_unknown_ids_are_not_found_naming_the_parameter(
         with pytest.raises(NotFoundError) as err:
             await call
         assert err.value.extra["field"] == field
+        # never a canned example search unrelated to the ID that missed
+        steps = err.value.extra["next_commands"]
+        assert all("BRAF V600E" not in str(step) for step in steps)
 
 
 async def test_variant_labels_every_coordinate_with_its_assembly(
@@ -138,6 +171,10 @@ async def test_evidence_search_defaults_to_accepted_and_pages_honestly(
     first = await civic_service.search_evidence_items(molecular_profile_id=12)
     assert _sent(mocked_civic, "EvidenceSearch")[-1]["status"] == "ACCEPTED"
     assert first["total"] == 97 and first["returned"] == 10 and first["next_offset"] == 10
+    # a level breakdown of the whole result set, without paging it
+    assert sum(first["counts_by_level"].values()) == 97 and set(first["counts_by_level"]) == set(
+        "ABCDE"
+    )
     assert "statement" not in first["evidence_items"][0]
     second = await civic_service.search_evidence_items(molecular_profile_id=12, offset=10)
     assert _sent(mocked_civic, "EvidenceSearch")[-1]["after"] == "MTA="  # base64("10")
@@ -151,6 +188,17 @@ async def test_standard_mode_fences_the_evidence_statement(civic_service: CivicS
     )
     statement = out["evidence_items"][0]["statement"]
     assert statement["kind"] == "untrusted_text" and statement["provenance"]["source"] == "civic"
+
+
+async def test_minimal_rows_keep_curation_status(civic_service: CivicService) -> None:
+    """status=ALL mixes ACCEPTED/SUBMITTED/REJECTED: even minimal rows must say which."""
+    out = await civic_service.search_evidence_items(
+        molecular_profile_id=12, response_mode="minimal"
+    )
+    assert out["evidence_items"][0]["status"] == "ACCEPTED"
+    assert out["evidence_items"][0]["disease"].keys() == {"name", "doid"}  # name, not just DOID
+    out = await civic_service.search_assertions(molecular_profile_id=12, response_mode="minimal")
+    assert {"status", "assertion_type"} <= out["assertions"][0].keys()
 
 
 async def test_empty_evidence_is_no_civic_evidence_found(civic_service: CivicService) -> None:
@@ -176,9 +224,13 @@ async def test_disease_and_therapy_filters_never_match_silently(
         with pytest.raises(NotFoundError) as err:
             await civic_service.search_evidence_items(**kwargs)
         assert err.value.extra["field"] == field
-    await civic_service.search_evidence_items(disease="DOID:1909", therapy="Vemurafenib")
+    out = await civic_service.search_evidence_items(disease="DOID:1909", therapy="Vemurafenib")
     sent = _sent(mocked_civic, "EvidenceSearch")[-1]
     assert sent["disease_id"] == 7 and sent["therapy_name"] == "Vemurafenib"
+    # a name widens silently (Melanoma also matches Skin Melanoma): say so; a code is exact
+    assert out["match_notes"] == {"disease": CODE_MATCH, "therapy": NAME_MATCH}
+    out = await civic_service.search_evidence_items(disease="Melanoma")
+    assert out["match_notes"] == {"disease": NAME_MATCH}
 
 
 async def test_oncogenic_assertions_carry_only_the_oncogenicity_axis(
@@ -196,6 +248,15 @@ async def test_get_assertion_aid10_is_tier_i_level_a(civic_service: CivicService
     assert a["actionability"]["fda_companion_test"] is True
     assert a["summary"]["kind"] == a["description"]["kind"] == "untrusted_text"
     assert [e["id"] for e in a["evidence_items"]] == [6966, 6044, 1421]
+    # enough per item to see that two of AID10's EIDs sit on BRAF V600 (MP17), not V600E
+    assert a["evidence_items"][0] == {
+        "id": 6966,
+        "name": "EID6966",
+        "status": "ACCEPTED",
+        "evidence_level": "B",
+        "molecular_profile": {"id": 17, "name": "BRAF V600"},
+        "pmid": "25037139",
+    }
     assert (
         "not a clinical actionability report"
         in (await civic_service.get_assertion(10))["disclaimer"]
@@ -214,11 +275,18 @@ async def test_gene_by_symbol_or_ncbi_id_and_foreign_ids_get_a_converter(
             await civic_service.get_gene(foreign, 5, 0)
         extra = err.value.extra
         assert extra["field"] == "gene" and extra["allowed_values"]
+        # a path that works on this server alone, not only the router's converter
+        assert "retry get_gene with the gene's HGNC symbol" in extra["hint"]
         assert extra["next_commands"] == [
             {"tool": "hgnc_resolve_symbol", "arguments": {"query": foreign}}
         ]
     with pytest.raises(NotFoundError):
         await civic_service.get_gene("NOPE1", 5, 0)
+
+
+async def test_gene_summary_is_sent_on_the_first_page_only(civic_service: CivicService) -> None:
+    assert (await civic_service.get_gene("BRAF", 5, 0))["gene"]["description"]
+    assert (await civic_service.get_gene("BRAF", 5, 5))["gene"]["description"] is None
 
 
 async def test_limit_never_exceeds_the_silent_upstream_page_cap(

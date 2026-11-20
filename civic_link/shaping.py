@@ -13,6 +13,7 @@ import base64
 import csv
 import io
 import re
+from datetime import UTC, datetime
 from typing import Any
 
 from civic_link.mcp.untrusted_content import fence_untrusted_text
@@ -46,7 +47,7 @@ _ASSEMBLY = {"GRCH37": "GRCh37", "GRCH38": "GRCh38", "NCBI36": "NCBI36"}
 
 #: Query / argument forms.
 CAID = re.compile(r"^CA\d{1,12}$", re.IGNORECASE)
-CLINVAR = re.compile(r"^(?:VCV)?0*(\d{1,9})(?:\.\d+)?$", re.IGNORECASE)
+CLINVAR = re.compile(r"^(?:ClinVar:)?(?:VCV)?0*(\d{1,9})(?:\.\d+)?$", re.IGNORECASE)
 HGVS = re.compile(r"^[A-Z]{2}_\d+(?:\.\d+)?:[cgnmpr]\.\S+$", re.IGNORECASE)
 DOID_RE = re.compile(r"^DOID:(\d{1,9})$", re.IGNORECASE)
 NCIT_RE = re.compile(r"^(?:NCIT:)?(C\d{1,9})$", re.IGNORECASE)
@@ -54,6 +55,35 @@ NCBI_GENE = re.compile(r"^(?:NCBIGene:)?(\d{1,9})$", re.IGNORECASE)
 FOREIGN_GENE = re.compile(r"^(ENSG\d+(\.\d+)?|HGNC:\d+)$", re.IGNORECASE)
 SYMBOL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.\-]{0,29}$")
 WS = re.compile(r"\s+")
+P_DOT = re.compile(r"(?<= )p\.", re.IGNORECASE)  # "BRAF p.V600E" -> CIViC's "BRAF V600E"
+ROUTER_ONLY = (
+    "{tool} (next_commands) is a GeneFoundry fleet tool reached through the genefoundry "
+    "router, not a tool of this server."
+)
+FOREIGN_GENE_HINT = ROUTER_ONLY.format(tool="hgnc_resolve_symbol") + (
+    " On this server alone, retry get_gene with the gene's HGNC symbol (EGFR) or NCBI Gene ID "
+    "(1956) if you know it."
+)
+NAME_MATCH = (
+    "name filter: matches every CIViC name containing it (rows carry each DOID / NCIt); "
+    "a DOID or NCIt code matches that one term exactly, without its subtypes"
+)
+CODE_MATCH = "code filter: matches that one DOID / NCIt term exactly, without its subtypes"
+NO_ACCEPTED = (
+    "No accepted CIViC evidence for this profile; {n} submitted or rejected (unreviewed or "
+    "refused) items exist, see search_evidence_items(status=ALL). This is not a statement "
+    "that the variant is not actionable or not oncogenic."
+)
+MP_MISS_HINT = (
+    "Search by gene and variant as CIViC names them (BRAF V600E), a ClinGen CAID (CA123643), "
+    "a ClinVar variation ID (376069) or an HGVS string. get_gene lists every variant CIViC "
+    "curates for a gene. No CIViC profile is not evidence that a variant is benign or not "
+    "actionable."
+)
+COUNTS_NOTE = (
+    "Row evidence counts are CIViC's cached per-profile counters and can lag the live list "
+    "by a few items; get_molecular_profile and search_evidence_items count the list itself."
+)
 
 
 def hgvs_key(value: str) -> str:
@@ -173,11 +203,20 @@ def mp_row(raw: dict[str, Any]) -> dict[str, Any]:
     return row
 
 
-def mp_detail(raw: dict[str, Any]) -> dict[str, Any]:
-    """One molecular profile: variants, evidence counts, fenced description."""
-    status = raw.get("evidenceCountsByStatus") or {}
+def mp_detail(raw: dict[str, Any], live: dict[str, Any]) -> dict[str, Any]:
+    """One molecular profile: variants, live evidence counts, fenced description.
+
+    ``live`` holds the MpGet root aliases (``status_*``/``accepted_*``): counts of the
+    evidence list itself, which CIViC's cached per-profile counters can lag.
+    """
+
+    def n(alias: str) -> Any:
+        return (live.get(alias) or {}).get("totalCount")
+
     return {
         **mp_row(raw),
+        "accepted_evidence_count": n("status_accepted"),
+        "submitted_evidence_count": n("status_submitted"),
         "aliases": raw.get("molecularProfileAliases") or [],
         "score": raw.get("molecularProfileScore"),
         "variants": [
@@ -190,13 +229,10 @@ def mp_detail(raw: dict[str, Any]) -> dict[str, Any]:
             for v in raw.get("variants") or []
         ],
         "evidence_counts_by_status": {
-            "accepted": status.get("acceptedCount"),
-            "submitted": status.get("submittedCount"),
-            "rejected": status.get("rejectedCount"),
+            s: n(f"status_{s}") for s in ("accepted", "submitted", "rejected")
         },
-        "evidence_counts_by_type_all_statuses": {
-            k.removesuffix("Count") + "_count": v
-            for k, v in (raw.get("evidenceCountsByType") or {}).items()
+        "evidence_counts_by_type_accepted": {
+            k.removeprefix("accepted_"): n(k) for k in live if k.startswith("accepted_")
         },
         "description": fence(raw.get("description"), f"MP{raw.get('id')}"),
         "url": SITE + str(raw.get("link") or ""),
@@ -206,7 +242,13 @@ def mp_detail(raw: dict[str, Any]) -> dict[str, Any]:
 def assertion_row(raw: dict[str, Any], mode: str = "compact") -> dict[str, Any]:
     """An assertion at one response_mode; the classification axes stay separate."""
     if mode == "minimal":
-        return {"id": raw.get("id"), "name": raw.get("name"), **classification(raw)}
+        return {
+            "id": raw.get("id"),
+            "name": raw.get("name"),
+            "status": raw.get("status"),
+            "assertion_type": raw.get("assertionType"),
+            **classification(raw),
+        }
     out = {
         "id": raw.get("id"),
         "name": raw.get("name"),
@@ -232,10 +274,11 @@ def evidence_row(raw: dict[str, Any], mode: str = "compact") -> dict[str, Any]:
         return {
             "id": raw.get("id"),
             "name": raw.get("name"),
+            "status": raw.get("status"),
             "evidence_type": raw.get("evidenceType"),
             "evidence_level": raw.get("evidenceLevel"),
             "significance": raw.get("significance"),
-            "disease_doid": disease["doid"] if disease else None,
+            "disease": disease,
         }
     source = raw.get("source") or {}
     out = {
@@ -321,3 +364,73 @@ def variant_detail(raw: dict[str, Any]) -> dict[str, Any]:
     if raw.get("__typename") == "FactorVariant":
         out["ncit"] = raw.get("ncitId")
     return out
+
+
+def assertion_evidence(e: dict[str, Any]) -> dict[str, Any]:
+    """An evidence item behind an assertion: enough to see its status, level, profile, PMID."""
+    source = e.get("source") or {}
+    return {
+        "id": e.get("id"),
+        "name": e.get("name"),
+        "status": e.get("status"),
+        "evidence_level": e.get("evidenceLevel"),
+        "molecular_profile": e.get("molecularProfile"),
+        "pmid": source.get("citationId") if source.get("sourceType") == "PUBMED" else None,
+    }
+
+
+def gene_variant(v: dict[str, Any]) -> dict[str, Any]:
+    """A variant row of get_gene."""
+    return {
+        "id": v.get("id"),
+        "name": v.get("name"),
+        "single_variant_molecular_profile_id": v.get("singleVariantMolecularProfileId"),
+    }
+
+
+def gene_detail(raw: dict[str, Any], *, first_page: bool) -> dict[str, Any]:
+    """A CIViC gene; the curator summary is sent on the first page only."""
+    return {
+        "id": raw.get("id"),
+        "symbol": raw.get("name"),
+        "full_name": raw.get("fullName"),
+        "entrez_id": raw.get("entrezId"),
+        "aliases": raw.get("featureAliases") or [],
+        "description": fence(raw.get("description"), str(raw.get("name"))) if first_page else None,
+        "url": SITE + str(raw.get("link") or ""),
+    }
+
+
+def profile_note(counts: dict[str, Any]) -> str:
+    """Why a profile has no accepted assertion: accepted evidence, only unreviewed, or none."""
+    unreviewed = (counts["submitted"] or 0) + (counts["rejected"] or 0)
+    if counts["accepted"]:
+        return NO_ASSERTION
+    return NO_ACCEPTED.format(n=unreviewed) if unreviewed else NO_EVIDENCE
+
+
+def now_iso() -> str:
+    """UTC now, second precision, ``Z`` suffix."""
+    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def level_counts(data: dict[str, Any]) -> dict[str, int]:
+    """EvidenceSearch's ``level_X`` aliases: totals per level for the same filters, any level."""
+    return {k[-1]: v["totalCount"] for k, v in data.items() if k.startswith("level_")}
+
+
+def match_notes(filters: dict[str, Any]) -> dict[str, str]:
+    """How each disease/therapy filter matched: a name widens, a DOID/NCIt code is exact."""
+    return {
+        f: NAME_MATCH if f"{f}_name" in filters else CODE_MATCH
+        for f in ("disease", "therapy")
+        if f"{f}_name" in filters or f"{f}_id" in filters
+    }
+
+
+def kind_totals(data: dict[str, Any], total: int) -> dict[str, int]:
+    """simple_total/complex_total over the whole result (MpSearch ``kinds``, first 100 only)."""
+    kinds = [n.get("isComplex") for n in (data.get("kinds") or {}).get("nodes") or []]
+    if not kinds or len(kinds) != total:  # over CIViC's 100-node cap: unknown, not guessed
+        return {}
+    return {"simple_total": kinds.count(False), "complex_total": kinds.count(True)}

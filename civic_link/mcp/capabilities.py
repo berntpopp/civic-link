@@ -16,7 +16,13 @@ from civic_link.mcp.resources import (
     RATE_LIMIT_POLICY,
     RESEARCH_USE_NOTICE,
 )
-from civic_link.service import DEFAULT_LIMIT, MAX_LIMIT, UPSTREAM_PAGE_CAP
+from civic_link.service import (
+    DEFAULT_LIMIT,
+    GENE_DEFAULT_LIMIT,
+    MAX_LIMIT,
+    MP_DEFAULT_LIMIT,
+    UPSTREAM_PAGE_CAP,
+)
 
 ERROR_CODES: list[str] = [
     "invalid_input",
@@ -64,8 +70,15 @@ def build_capabilities() -> dict[str, Any]:
         "data_version": "latest monthly CIViC data release + live:<UTC timestamp>, on every "
         "data payload",
         "limits": {
-            "default_limit": DEFAULT_LIMIT,
-            "max_limit": MAX_LIMIT,
+            "per_tool": {
+                "search_molecular_profiles": {
+                    "default": MP_DEFAULT_LIMIT,
+                    "max": UPSTREAM_PAGE_CAP,
+                },
+                "search_evidence_items": {"default": DEFAULT_LIMIT, "max": MAX_LIMIT},
+                "search_assertions": {"default": DEFAULT_LIMIT, "max": MAX_LIMIT},
+                "get_gene": {"default": GENE_DEFAULT_LIMIT, "max": UPSTREAM_PAGE_CAP},
+            },
             "upstream_page_cap": UPSTREAM_PAGE_CAP,
         },
         "genome_build": "CIViC primary coordinates are GRCh37; every coordinate block and "

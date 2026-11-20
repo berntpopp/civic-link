@@ -1,5 +1,32 @@
 {
  "data": {
-  "molecularProfile": null
+  "accepted_diagnostic": {
+   "totalCount": 0
+  },
+  "accepted_functional": {
+   "totalCount": 0
+  },
+  "accepted_oncogenic": {
+   "totalCount": 0
+  },
+  "accepted_predictive": {
+   "totalCount": 0
+  },
+  "accepted_predisposing": {
+   "totalCount": 0
+  },
+  "accepted_prognostic": {
+   "totalCount": 0
+  },
+  "molecularProfile": null,
+  "status_accepted": {
+   "totalCount": 0
+  },
+  "status_rejected": {
+   "totalCount": 0
+  },
+  "status_submitted": {
+   "totalCount": 0
+  }
  }
 }
