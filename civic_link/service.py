@@ -198,13 +198,16 @@ class CivicService:
         if total == 0:
             raise self._mp_miss(term, kind)
         rows = [mp_row(n) for n in found.get("nodes") or []]
+        # the list a row sits in says its kind; dropping it per row saves tokens
+        split: dict[str, list[dict[str, Any]]] = {"simple": [], "complex": []}
+        for r in rows:
+            split[r.pop("kind")].append(r)
         name = variables.get("name", term)
         payload: dict[str, Any] = {
             "query": term,
             "query_type": kind,
             "exact_match": self._exact(name, kind, found.get("nodes") or [], variant_id),
-            "simple": [r for r in rows if r["kind"] == "simple"],
-            "complex": [r for r in rows if r["kind"] == "complex"],
+            **split,
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
             **kind_totals(data, total),
         }

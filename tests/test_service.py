@@ -26,7 +26,7 @@ async def test_name_search_keeps_complex_profiles_out_of_the_simple_answer(
     out = await civic_service.search_molecular_profiles("BRAF  V600E", 25, 0)
     assert out["query_type"] == "name" and out["exact_match"] == {"id": 12, "name": "BRAF V600E"}
     assert [r["id"] for r in out["simple"]] == [12, 685]
-    assert out["complex"] and {r["kind"] for r in out["complex"]} == {"complex"}
+    assert out["complex"] and not {"kind"} & {k for r in out["simple"] + out["complex"] for k in r}
     assert not {r["id"] for r in out["complex"]} & {r["id"] for r in out["simple"]}
     assert "combination" in out["complex_note"]
     # honest paging from CIViC's own totalCount (41 profiles mention BRAF V600E)

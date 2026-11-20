@@ -142,7 +142,7 @@ async def test_descriptions_name_only_returned_fields(facade: Any, call_tool: An
     """Contract truth: the fields a description promises are in the response."""
     found = await call_tool(facade, "search_molecular_profiles", {"query": "BRAF V600E"})
     assert {"exact_match", "simple", "complex"} <= set(found)
-    assert {"id", "name", "kind"} <= set(found["simple"][0])
+    assert {"id", "name", "accepted_evidence_count"} <= set(found["simple"][0])
     mp = await call_tool(facade, "get_molecular_profile", {"molecular_profile_id": 79})
     assert {"evidence_note", "assertions"} <= set(mp)
     variant = (await call_tool(facade, "get_variant", {"variant_id": 12}))["variant"]

@@ -112,7 +112,7 @@ def register_civic_tools(mcp: FastMCP) -> None:
             "name (BRAF V600E), a ClinGen CAID (CA123643), a ClinVar variation ID (376069) or "
             "an HGVS string, and return exact_match (the single-variant profile) plus "
             "`simple` and `complex` lists kept apart: a complex profile (V600E AND MSI Low) "
-            "only applies to that combination. Each row: id, name, kind, evidence counts; "
+            "only applies to that combination. Each row: id, name, evidence counts; "
             "simple_total and complex_total count the whole result. "
             "Start here. Signature: search_molecular_profiles(query, limit=, offset=)."
         ),
