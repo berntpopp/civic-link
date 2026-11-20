@@ -52,6 +52,7 @@ async def test_protein_prefix_in_a_name_query_is_dropped(civic_service: CivicSer
         ("CA123643", "caid"),
         ("376069", "clinvar"),
         ("VCV000376069", "clinvar"),
+        ("ClinVar:376069", "clinvar"),  # CURIE form
         ("NC_000007.14:g.140753336A>T", "hgvs"),
         ("nm_004333:c.1799T>A", "hgvs"),  # case and accession version are ignored
     ],

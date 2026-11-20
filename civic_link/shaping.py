@@ -47,7 +47,7 @@ _ASSEMBLY = {"GRCH37": "GRCh37", "GRCH38": "GRCh38", "NCBI36": "NCBI36"}
 
 #: Query / argument forms.
 CAID = re.compile(r"^CA\d{1,12}$", re.IGNORECASE)
-CLINVAR = re.compile(r"^(?:VCV)?0*(\d{1,9})(?:\.\d+)?$", re.IGNORECASE)
+CLINVAR = re.compile(r"^(?:ClinVar:)?(?:VCV)?0*(\d{1,9})(?:\.\d+)?$", re.IGNORECASE)
 HGVS = re.compile(r"^[A-Z]{2}_\d+(?:\.\d+)?:[cgnmpr]\.\S+$", re.IGNORECASE)
 DOID_RE = re.compile(r"^DOID:(\d{1,9})$", re.IGNORECASE)
 NCIT_RE = re.compile(r"^(?:NCIT:)?(C\d{1,9})$", re.IGNORECASE)
