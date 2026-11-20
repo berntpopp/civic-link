@@ -1,0 +1,14 @@
+{
+ "data": {
+  "diseases": {
+   "nodes": [
+    {
+     "doid": "6367",
+     "id": 192,
+     "name": "Acral Lentiginous Melanoma"
+    }
+   ],
+   "totalCount": 18
+  }
+ }
+}

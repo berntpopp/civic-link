@@ -1,0 +1,22 @@
+{
+ "errors": [
+  {
+   "extensions": {
+    "problems": [
+     {
+      "explanation": "Could not coerce value 99999999999 to Int",
+      "path": []
+     }
+    ],
+    "value": 99999999999
+   },
+   "locations": [
+    {
+     "column": 9,
+     "line": 1
+    }
+   ],
+   "message": "Variable $molecular_profile_id of type Int was provided invalid value"
+  }
+ ]
+}

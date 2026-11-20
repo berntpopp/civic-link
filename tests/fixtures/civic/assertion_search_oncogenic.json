@@ -1,0 +1,108 @@
+{
+ "data": {
+  "assertions": {
+   "nodes": [
+    {
+     "acmgCodes": [],
+     "ampLevel": null,
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "ONCOGENIC",
+     "clingenCodes": [
+      {
+       "code": "N/A"
+      }
+     ],
+     "disease": {
+      "doid": "162",
+      "name": "Cancer"
+     },
+     "fdaCompanionTest": null,
+     "id": 101,
+     "molecularProfile": {
+      "id": 1252,
+      "name": "LMNA::NTRK1 Fusion"
+     },
+     "name": "AID101",
+     "nccnGuideline": null,
+     "nccnGuidelineVersion": null,
+     "regulatoryApproval": null,
+     "significance": "ONCOGENIC",
+     "status": "ACCEPTED",
+     "summary": "LMNA::NTRK1 is classified as an Oncogenic NTRK fusion.",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "acmgCodes": [],
+     "ampLevel": null,
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "ONCOGENIC",
+     "clingenCodes": [
+      {
+       "code": "N/A"
+      }
+     ],
+     "disease": {
+      "doid": null,
+      "name": "Solid Tumor"
+     },
+     "fdaCompanionTest": null,
+     "id": 63,
+     "molecularProfile": {
+      "id": 4167,
+      "name": "EML4::NTRK3 Fusion"
+     },
+     "name": "AID63",
+     "nccnGuideline": null,
+     "nccnGuidelineVersion": null,
+     "regulatoryApproval": null,
+     "significance": "ONCOGENIC",
+     "status": "ACCEPTED",
+     "summary": "EML4::NTRK3 is classified as an oncogenic NTRK fusion.",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "acmgCodes": [],
+     "ampLevel": null,
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "ONCOGENIC",
+     "clingenCodes": [
+      {
+       "code": "OS2"
+      },
+      {
+       "code": "OS3"
+      },
+      {
+       "code": "OP4"
+      }
+     ],
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "fdaCompanionTest": null,
+     "id": 320,
+     "molecularProfile": {
+      "id": 559,
+      "name": "BRAF V600K"
+     },
+     "name": "AID320",
+     "nccnGuideline": null,
+     "nccnGuidelineVersion": null,
+     "regulatoryApproval": null,
+     "significance": "LIKELY_ONCOGENIC",
+     "status": "ACCEPTED",
+     "summary": "BRAF V600K is likely oncogenic in melanoma.",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    }
+   ],
+   "totalCount": 50
+  }
+ }
+}

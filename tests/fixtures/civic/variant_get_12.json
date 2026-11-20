@@ -1,0 +1,55 @@
+{
+ "data": {
+  "variant": {
+   "__typename": "GeneVariant",
+   "alleleRegistryId": "CA123643",
+   "clinvarIds": [
+    "13961",
+    "376069"
+   ],
+   "coordinates": {
+    "chromosome": "7",
+    "ensemblVersion": 75,
+    "referenceBases": "A",
+    "referenceBuild": "GRCH37",
+    "representativeTranscript": "ENST00000288602.6",
+    "start": 140453136,
+    "stop": 140453136,
+    "variantBases": "T"
+   },
+   "feature": {
+    "id": 5,
+    "name": "BRAF"
+   },
+   "hgvsDescriptions": [
+    "NM_004333.4:c.1799T>A",
+    "NP_004324.2:p.Val600Glu",
+    "NC_000007.13:g.140453136A>T",
+    "ENST00000288602.6:c.1799T>A",
+    "NC_000007.14:g.140753336A>T",
+    "ENSP00000493543.1:p.Val600Glu",
+    "ENSP00000496776.1:p.Val640Glu"
+   ],
+   "id": 12,
+   "link": "/variants/12",
+   "maneSelectTranscript": "ENST00000646891.2:c.1799T>A",
+   "molecularProfiles": {
+    "totalCount": 40
+   },
+   "name": "V600E",
+   "singleVariantMolecularProfileId": 12,
+   "variantAliases": [
+    "RS113488022",
+    "VAL600GLU",
+    "V640E",
+    "VAL640GLU"
+   ],
+   "variantTypes": [
+    {
+     "name": "Missense Variant",
+     "soid": "SO:0001583"
+    }
+   ]
+  }
+ }
+}
