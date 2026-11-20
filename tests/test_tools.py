@@ -66,11 +66,15 @@ async def test_assertion_and_evidence_ids_accept_civic_prefixes(
 
 
 async def test_malformed_prefixed_id_names_the_argument_and_its_forms(facade: Any) -> None:
-    for tool, arg in (("get_evidence_item", "evidence_id"), ("get_assertion", "assertion_id")):
+    for tool, arg, prefix in (
+        ("get_evidence_item", "evidence_id", "EID"),
+        ("get_assertion", "assertion_id", "AID"),
+    ):
         res = await _raw(facade, tool, {arg: "EIDabc"})
         body = res.structured_content
         assert res.is_error is True and body["field"] == arg
         assert "argument names" not in body["message"] and arg not in body["allowed_values"]
+        assert prefix in body["message"]  # the string form, not just the integer range
 
 
 async def test_evidence_paging_suggests_next_page(facade: Any, call_tool: Any) -> None:
