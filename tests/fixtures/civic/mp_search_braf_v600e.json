@@ -1,5 +1,132 @@
 {
  "data": {
+  "kinds": {
+   "nodes": [
+    {
+     "isComplex": false
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": false
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    },
+    {
+     "isComplex": true
+    }
+   ]
+  },
   "molecularProfiles": {
    "nodes": [
     {

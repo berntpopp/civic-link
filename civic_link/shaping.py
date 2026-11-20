@@ -274,7 +274,7 @@ def evidence_row(raw: dict[str, Any], mode: str = "compact") -> dict[str, Any]:
             "evidence_type": raw.get("evidenceType"),
             "evidence_level": raw.get("evidenceLevel"),
             "significance": raw.get("significance"),
-            "disease_doid": disease["doid"] if disease else None,
+            "disease": disease,
         }
     source = raw.get("source") or {}
     out = {
@@ -422,3 +422,11 @@ def match_notes(filters: dict[str, Any]) -> dict[str, str]:
         for f in ("disease", "therapy")
         if f"{f}_name" in filters or f"{f}_id" in filters
     }
+
+
+def kind_totals(data: dict[str, Any], total: int) -> dict[str, int]:
+    """simple_total/complex_total over the whole result (MpSearch ``kinds``, first 100 only)."""
+    kinds = [n.get("isComplex") for n in (data.get("kinds") or {}).get("nodes") or []]
+    if not kinds or len(kinds) != total:  # over CIViC's 100-node cap: unknown, not guessed
+        return {}
+    return {"simple_total": kinds.count(False), "complex_total": kinds.count(True)}

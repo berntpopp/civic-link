@@ -32,6 +32,8 @@ async def test_name_search_keeps_complex_profiles_out_of_the_simple_answer(
     # honest paging from CIViC's own totalCount (41 profiles mention BRAF V600E)
     assert out["total"] == 41 and out["returned"] == 25
     assert out["truncated"] is True and out["next_offset"] == 25
+    # whole-result split, so counting complex profiles needs no paging (total <= 100)
+    assert out["simple_total"] == 2 and out["complex_total"] == 39
     # the fixed notes ride on the first page only; later pages carry rows and paging
     later = await civic_service.search_molecular_profiles("BRAF V600E", 25, 25)
     assert "complex_note" not in later and "counts_note" not in later
@@ -186,6 +188,7 @@ async def test_minimal_rows_keep_curation_status(civic_service: CivicService) ->
         molecular_profile_id=12, response_mode="minimal"
     )
     assert out["evidence_items"][0]["status"] == "ACCEPTED"
+    assert out["evidence_items"][0]["disease"].keys() == {"name", "doid"}  # name, not just DOID
     out = await civic_service.search_assertions(molecular_profile_id=12, response_mode="minimal")
     assert {"status", "assertion_type"} <= out["assertions"][0].keys()
 

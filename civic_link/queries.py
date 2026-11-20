@@ -26,6 +26,8 @@ query MpSearch($name: String, $caid: String, $variant_id: Int, $first: Int, $aft
     totalCount
     nodes {{ {_MP_ROW} }}
   }}
+  kinds: molecularProfiles(name: $name, alleleRegistryId: $caid, variantId: $variant_id,
+                           first: 100) {{ nodes {{ isComplex }} }}
 }}
 """
 

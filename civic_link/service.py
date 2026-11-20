@@ -43,6 +43,7 @@ from civic_link.shaping import (
     gene_detail,
     gene_variant,
     hgvs_key,
+    kind_totals,
     level_counts,
     match_notes,
     mp_detail,
@@ -187,11 +188,10 @@ class CivicService:
                 variant_id = variables["variant_id"] = hits[0]["variant_id"]
         else:
             kind, variables["name"] = "name", P_DOT.sub("", term)
-        found: dict[str, Any] = {}
+        data: dict[str, Any] = {}
         if kind == "name" or "caid" in variables or variant_id is not None:
-            found = (await self.client.graphql(Q.MP_SEARCH, variables, fields=_PAGING_FIELDS))[
-                "molecularProfiles"
-            ] or {}
+            data = await self.client.graphql(Q.MP_SEARCH, variables, fields=_PAGING_FIELDS)
+        found = data.get("molecularProfiles") or {}
         total = int(found.get("totalCount") or 0)
         if total == 0:
             raise self._mp_miss(term, kind)
@@ -199,16 +199,12 @@ class CivicService:
         name = variables.get("name", term)
         payload: dict[str, Any] = {
             "query": term,
-            **(
-                {"query_normalized": variables["name"]}
-                if variables.get("name", term) != term
-                else {}
-            ),
             "query_type": kind,
             "exact_match": self._exact(name, kind, found.get("nodes") or [], variant_id),
             "simple": [r for r in rows if r["kind"] == "simple"],
             "complex": [r for r in rows if r["kind"] == "complex"],
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
+            **kind_totals(data, total),
         }
         if name != term:
             payload["query_normalized"] = name
