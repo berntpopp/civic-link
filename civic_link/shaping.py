@@ -408,3 +408,17 @@ def profile_note(counts: dict[str, Any]) -> str:
 def now_iso() -> str:
     """UTC now, second precision, ``Z`` suffix."""
     return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def level_counts(data: dict[str, Any]) -> dict[str, int]:
+    """EvidenceSearch's ``level_X`` aliases: totals per level for the same filters, any level."""
+    return {k[-1]: v["totalCount"] for k, v in data.items() if k.startswith("level_")}
+
+
+def match_notes(filters: dict[str, Any]) -> dict[str, str]:
+    """How each disease/therapy filter matched: a name widens, a DOID/NCIt code is exact."""
+    return {
+        f: NAME_MATCH if f"{f}_name" in filters else CODE_MATCH
+        for f in ("disease", "therapy")
+        if f"{f}_name" in filters or f"{f}_id" in filters
+    }

@@ -95,6 +95,15 @@ _EVIDENCE_ROW = f"""
   source {{ sourceType citationId citation }}
 """
 
+# Per-level totals for the same filters (any level), so a breakdown needs no paging.
+_EV_FILTERS = """molecularProfileId: $molecular_profile_id, diseaseName: $disease_name,
+    diseaseId: $disease_id, therapyName: $therapy_name, therapyId: $therapy_id,
+    evidenceType: $evidence_type, significance: $significance, status: $status"""
+_LEVEL_COUNTS = "\n".join(
+    f"  level_{lv}: evidenceItems({_EV_FILTERS}, evidenceLevel: {lv}) {{ totalCount }}"
+    for lv in "ABCDE"
+)
+
 EVIDENCE_SEARCH = f"""
 query EvidenceSearch($molecular_profile_id: Int, $disease_name: String, $disease_id: Int,
   $therapy_name: String, $therapy_id: Int, $evidence_type: EvidenceType,
@@ -107,6 +116,7 @@ query EvidenceSearch($molecular_profile_id: Int, $disease_name: String, $disease
     totalCount
     nodes {{ {_EVIDENCE_ROW} description }}
   }}
+{_LEVEL_COUNTS}
 }}
 """
 

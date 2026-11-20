@@ -158,6 +158,10 @@ async def test_evidence_search_defaults_to_accepted_and_pages_honestly(
     first = await civic_service.search_evidence_items(molecular_profile_id=12)
     assert _sent(mocked_civic, "EvidenceSearch")[-1]["status"] == "ACCEPTED"
     assert first["total"] == 97 and first["returned"] == 10 and first["next_offset"] == 10
+    # a level breakdown of the whole result set, without paging it
+    assert sum(first["counts_by_level"].values()) == 97 and set(first["counts_by_level"]) == set(
+        "ABCDE"
+    )
     assert "statement" not in first["evidence_items"][0]
     second = await civic_service.search_evidence_items(molecular_profile_id=12, offset=10)
     assert _sent(mocked_civic, "EvidenceSearch")[-1]["after"] == "MTA="  # base64("10")

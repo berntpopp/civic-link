@@ -19,14 +19,12 @@ from civic_link.mcp.next_commands import cmd
 from civic_link.shaping import (
     CAID,
     CLINVAR,
-    CODE_MATCH,
     COMPLEX_NOTE,
     COUNTS_NOTE,
     DOID_RE,
     FOREIGN_GENE,
     HGVS,
     MP_MISS_HINT,
-    NAME_MATCH,
     NCBI_GENE,
     NCIT_RE,
     NO_EVIDENCE,
@@ -45,6 +43,8 @@ from civic_link.shaping import (
     gene_detail,
     gene_variant,
     hgvs_key,
+    level_counts,
+    match_notes,
     mp_detail,
     mp_row,
     now_iso,
@@ -310,7 +310,8 @@ class CivicService:
         fields = _PAGING_FIELDS | {
             f"{k}_{s}": k for k in ("disease", "therapy") for s in ("name", "id")
         }
-        conn = (await self.client.graphql(document, variables, fields=fields)).get(root) or {}
+        data = await self.client.graphql(document, variables, fields=fields)
+        conn = data.get(root) or {}
         total = int(conn.get("totalCount") or 0)
         mp_id = args.get("molecular_profile_id")
         if total == 0 and mp_id is not None:  # an unknown profile is not_found, not "none"
@@ -323,13 +324,10 @@ class CivicService:
             key: rows,
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
         }
-        notes = {
-            f: NAME_MATCH if f"{f}_name" in filters else CODE_MATCH
-            for f in ("disease", "therapy")
-            if f"{f}_name" in filters or f"{f}_id" in filters
-        }
-        if notes:
+        if notes := match_notes(filters):
             payload["match_notes"] = notes
+        if levels := level_counts(data):
+            payload["counts_by_level"] = levels
         if total == 0:
             payload["evidence_note"] = NO_EVIDENCE
         return await self._stamp(payload)

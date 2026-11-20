@@ -213,7 +213,7 @@ def register_civic_tools(mcp: FastMCP) -> None:
             "ALL given filters: molecular_profile_id, disease, therapy, evidence_type, "
             "evidence_level (A validated .. E inferential), significance, status (ACCEPTED "
             "by default). Rows: type, level, direction, significance, rating, DOID disease, "
-            "therapies (NCIt), source PMID. `total` is exact; zero rows says no CIViC "
+            "therapies (NCIt), source PMID. `total` is exact and counts_by_level breaks it down by level; zero rows says no CIViC "
             "evidence found. Signature: search_evidence_items(molecular_profile_id=, "
             "disease=, therapy=, evidence_type=, evidence_level=, significance=, status=, "
             "response_mode=, limit=, offset=)."

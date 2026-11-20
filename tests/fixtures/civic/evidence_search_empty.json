@@ -3,6 +3,21 @@
   "evidenceItems": {
    "nodes": [],
    "totalCount": 0
+  },
+  "level_A": {
+   "totalCount": 0
+  },
+  "level_B": {
+   "totalCount": 0
+  },
+  "level_C": {
+   "totalCount": 0
+  },
+  "level_D": {
+   "totalCount": 0
+  },
+  "level_E": {
+   "totalCount": 0
   }
  }
 }

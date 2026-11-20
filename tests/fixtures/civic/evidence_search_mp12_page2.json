@@ -338,6 +338,21 @@
     }
    ],
    "totalCount": 97
+  },
+  "level_A": {
+   "totalCount": 6
+  },
+  "level_B": {
+   "totalCount": 62
+  },
+  "level_C": {
+   "totalCount": 17
+  },
+  "level_D": {
+   "totalCount": 12
+  },
+  "level_E": {
+   "totalCount": 0
   }
  }
 }
