@@ -54,6 +54,11 @@ NCBI_GENE = re.compile(r"^(?:NCBIGene:)?(\d{1,9})$", re.IGNORECASE)
 FOREIGN_GENE = re.compile(r"^(ENSG\d+(\.\d+)?|HGNC:\d+)$", re.IGNORECASE)
 SYMBOL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.\-]{0,29}$")
 WS = re.compile(r"\s+")
+P_DOT = re.compile(r"(?<= )p\.", re.IGNORECASE)  # "BRAF p.V600E" -> CIViC's "BRAF V600E"
+COUNTS_NOTE = (
+    "Row evidence counts are CIViC's cached per-profile counters and can lag the live list "
+    "by a few items; get_molecular_profile and search_evidence_items count the list itself."
+)
 
 
 def hgvs_key(value: str) -> str:

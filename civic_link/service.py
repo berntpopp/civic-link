@@ -21,6 +21,7 @@ from civic_link.shaping import (
     CAID,
     CLINVAR,
     COMPLEX_NOTE,
+    COUNTS_NOTE,
     DOID_RE,
     FOREIGN_GENE,
     HGVS,
@@ -29,6 +30,7 @@ from civic_link.shaping import (
     NO_ASSERTION,
     NO_EVIDENCE,
     NOT_A_REPORT,
+    P_DOT,
     SITE,
     SYMBOL,
     WS,
@@ -178,6 +180,7 @@ class CivicService:
             if hits:
                 variant_id = variables["variant_id"] = hits[0]["variant_id"]
         else:
+            term = P_DOT.sub("", term)
             kind, variables["name"] = "name", term
         found: dict[str, Any] = {}
         if kind == "name" or "caid" in variables or variant_id is not None:
@@ -195,6 +198,7 @@ class CivicService:
             "simple": [r for r in rows if r["kind"] == "simple"],
             "complex": [r for r in rows if r["kind"] == "complex"],
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
+            "counts_note": COUNTS_NOTE,
         }
         if variant_id is not None:
             payload["variant_id"] = variant_id

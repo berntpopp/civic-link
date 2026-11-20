@@ -33,6 +33,13 @@ async def test_name_search_keeps_complex_profiles_out_of_the_simple_answer(
     assert out["truncated"] is True and out["next_offset"] == 25
 
 
+async def test_protein_prefix_in_a_name_query_is_dropped(civic_service: CivicService) -> None:
+    out = await civic_service.search_molecular_profiles("BRAF p.V600E", 25, 0)
+    assert out["exact_match"] == {"id": 12, "name": "BRAF V600E"}
+    assert out["query"] == "BRAF V600E"
+    assert "cached" in out["counts_note"]
+
+
 @pytest.mark.parametrize(
     ("query", "kind"),
     [
