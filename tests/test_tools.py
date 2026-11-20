@@ -133,12 +133,32 @@ async def test_descriptions_name_only_returned_fields(facade: Any, call_tool: An
 
 async def test_significance_enum_covers_civic_vocabulary(facade: Any) -> None:
     """Every CIViC EvidenceSignificance value (introspected 2026-11-20) is accepted."""
-    civic = (
-        "SENSITIVITYRESPONSE RESISTANCE BETTER_OUTCOME POOR_OUTCOME POSITIVE NEGATIVE NA "
-        "ADVERSE_RESPONSE PATHOGENIC LIKELY_PATHOGENIC BENIGN LIKELY_BENIGN UNCERTAIN_SIGNIFICANCE "
-        "REDUCED_SENSITIVITY GAIN_OF_FUNCTION LOSS_OF_FUNCTION UNALTERED_FUNCTION NEOMORPHIC "
-        "UNKNOWN DOMINANT_NEGATIVE PREDISPOSITION PROTECTIVENESS ONCOGENICITY LIKELY_ONCOGENIC"
-    ).split()
+    civic = [
+        "SENSITIVITYRESPONSE",
+        "RESISTANCE",
+        "BETTER_OUTCOME",
+        "POOR_OUTCOME",
+        "POSITIVE",
+        "NEGATIVE",
+        "NA",
+        "ADVERSE_RESPONSE",
+        "PATHOGENIC",
+        "LIKELY_PATHOGENIC",
+        "BENIGN",
+        "LIKELY_BENIGN",
+        "UNCERTAIN_SIGNIFICANCE",
+        "REDUCED_SENSITIVITY",
+        "GAIN_OF_FUNCTION",
+        "LOSS_OF_FUNCTION",
+        "UNALTERED_FUNCTION",
+        "NEOMORPHIC",
+        "UNKNOWN",
+        "DOMINANT_NEGATIVE",
+        "PREDISPOSITION",
+        "PROTECTIVENESS",
+        "ONCOGENICITY",
+        "LIKELY_ONCOGENIC",
+    ]
     async with Client(facade) as client:
         tool = next(t for t in await client.list_tools() if t.name == "search_evidence_items")
     prop = tool.input_schema["properties"]["significance"]
