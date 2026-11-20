@@ -94,7 +94,9 @@ class ArgValidationMiddleware(Middleware):
         arguments: dict[str, Any],
     ) -> ToolResult:
         first = exc.errors(include_url=False)[0]
-        loc = ".".join(str(p) for p in first.get("loc", ())) or "input"
+        parts = [str(p) for p in first.get("loc", ())]
+        # a union-typed param reports its branch too (evidence_id.constrained-int)
+        loc = parts[0] if parts and parts[0] in valid else ".".join(parts) or "input"
         error_type = str(first.get("type", "value_error"))
         # A real param with a bad *value* -> surface the constraint (enum/range)
         # or, failing that, the expected type + an example -- never the list of
