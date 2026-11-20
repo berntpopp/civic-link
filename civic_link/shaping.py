@@ -60,6 +60,10 @@ ROUTER_ONLY = (
     "{tool} (next_commands) is a GeneFoundry fleet tool reached through the genefoundry "
     "router, not a tool of this server."
 )
+FOREIGN_GENE_HINT = ROUTER_ONLY.format(tool="hgnc_resolve_symbol") + (
+    " On this server alone, retry get_gene with the gene's HGNC symbol (EGFR) or NCBI Gene ID "
+    "(1956) if you know it."
+)
 NAME_MATCH = (
     "name filter: matches every CIViC name containing it (rows carry each DOID / NCIt); "
     "a DOID or NCIt code matches that one term exactly, without its subtypes"

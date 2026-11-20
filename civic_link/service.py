@@ -23,6 +23,7 @@ from civic_link.shaping import (
     COUNTS_NOTE,
     DOID_RE,
     FOREIGN_GENE,
+    FOREIGN_GENE_HINT,
     HGVS,
     MP_MISS_HINT,
     NCBI_GENE,
@@ -256,8 +257,7 @@ class CivicService:
         detail = mp_detail(raw, data)
         conn = raw.get("assertions") or {}
         rejected = data.get("rejected_assertions") or {}  # absent from conn upstream
-        nodes = (conn.get("nodes") or []) + (rejected.get("nodes") or [])
-        rows = [assertion_row(a, "compact") for a in nodes]
+        rows = [assertion_row(a, "compact") for c in (conn, rejected) for a in c.get("nodes") or []]
         total = (conn.get("totalCount") or 0) + (rejected.get("totalCount") or 0)
         # ACCEPTED in full (as search_assertions defaults); unreviewed/rejected as stubs only
         accepted_assertions = [a for a in rows if a["status"] == "ACCEPTED"]
@@ -452,11 +452,10 @@ class CivicService:
         value = gene.strip()
         if FOREIGN_GENE.fullmatch(value):
             raise InvalidInputError(
-                "`gene` takes an HGNC symbol or an NCBI Gene ID; CIViC has no Ensembl or "
-                "HGNC ID lookup.",
+                "`gene` takes a symbol or NCBI Gene ID; CIViC has no Ensembl or HGNC ID lookup.",
                 field="gene",
                 allowed_values=["HGNC symbol (BRAF)", "NCBI Gene ID (NCBIGene:673 or 673)"],
-                hint=ROUTER_ONLY.format(tool="hgnc_resolve_symbol"),
+                hint=FOREIGN_GENE_HINT,
                 next_commands=[cmd("hgnc_resolve_symbol", query=value)],
             )
         entrez = NCBI_GENE.fullmatch(value)

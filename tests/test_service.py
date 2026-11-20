@@ -274,6 +274,8 @@ async def test_gene_by_symbol_or_ncbi_id_and_foreign_ids_get_a_converter(
             await civic_service.get_gene(foreign, 5, 0)
         extra = err.value.extra
         assert extra["field"] == "gene" and extra["allowed_values"]
+        # a path that works on this server alone, not only the router's converter
+        assert "retry get_gene with the gene's HGNC symbol" in extra["hint"]
         assert extra["next_commands"] == [
             {"tool": "hgnc_resolve_symbol", "arguments": {"query": foreign}}
         ]
