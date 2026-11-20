@@ -227,7 +227,7 @@ class CivicService:
             field="query",
             hint=(
                 "Search by gene and variant as CIViC names them (BRAF V600E), a ClinGen CAID "
-                "(CA123643), a ClinVar variation ID (13961) or an HGVS string. get_gene lists "
+                "(CA123643), a ClinVar variation ID (376069) or an HGVS string. get_gene lists "
                 "every variant CIViC curates for a gene. No CIViC profile is not evidence that "
                 "a variant is benign or not actionable."
             ),

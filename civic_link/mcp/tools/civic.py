@@ -109,7 +109,7 @@ def register_civic_tools(mcp: FastMCP) -> None:
         tags={"profiles"},
         description=(
             "Find CIViC molecular profiles (what evidence attaches to) for a gene + variant "
-            "name (BRAF V600E), a ClinGen CAID (CA123643), a ClinVar variation ID (13961) or "
+            "name (BRAF V600E), a ClinGen CAID (CA123643), a ClinVar variation ID (376069) or "
             "an HGVS string, and return exact_match (the single-variant profile) plus "
             "`simple` and `complex` lists kept apart: a complex profile (V600E AND MSI Low) "
             "only applies to that combination. Each row: id, name, kind, evidence counts. "
@@ -254,8 +254,17 @@ def register_civic_tools(mcp: FastMCP) -> None:
                 "PATHOGENIC",
                 "LIKELY_PATHOGENIC",
                 "UNCERTAIN_SIGNIFICANCE",
+                "BENIGN",
+                "LIKELY_BENIGN",
+                "PREDISPOSITION",
+                "PROTECTIVENESS",
                 "GAIN_OF_FUNCTION",
                 "LOSS_OF_FUNCTION",
+                "UNALTERED_FUNCTION",
+                "NEOMORPHIC",
+                "DOMINANT_NEGATIVE",
+                "UNKNOWN",
+                "NA",
             ]
             | None,
             Field(description="Clinical significance as CIViC records it."),
