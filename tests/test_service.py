@@ -101,13 +101,17 @@ async def test_molecular_profile_keeps_actionability_and_oncogenicity_apart(
     assert mp["evidence_counts_by_status"] == {"accepted": 97, "submitted": 121, "rejected": 9}
     assert mp["kind"] == "simple" and mp["evidence_counts_by_type_accepted"]["predictive"] == 76
     assert {a["status"] for a in out["assertions"]} == {"ACCEPTED"}
-    assert {a["status"] for a in out["other_assertions"]} == {"SUBMITTED"}
+    # CIViC's profile.assertions omits REJECTED ones; the root query adds them back (AID12)
+    assert {a["status"] for a in out["other_assertions"]} == {"SUBMITTED", "REJECTED"}
+    assert {"id": 12, "name": "AID12", "status": "REJECTED", "assertion_type": "PREDICTIVE"} in (
+        out["other_assertions"]
+    )
     assert out["other_assertions"][0].keys() == {"id", "name", "status", "assertion_type"}
     aid10 = next(a for a in out["assertions"] if a["name"] == "AID10")
     assert aid10["actionability"]["amp_tier_level"] == "TIER_I_LEVEL_A"
     assert aid10["oncogenicity"] is None and aid10["germline_pathogenicity"] is None
     assert aid10["disease"] == {"name": "Melanoma", "doid": "DOID:1909"}
-    assert out["assertions_total"] == 11 and len(out["assertions"]) == 6
+    assert out["assertions_total"] == 12 and len(out["assertions"]) == 6
     assert out["assertions_truncated"] is False
     assert "evidence_note" not in out
     assert out["data_version"].startswith("CIViC 01-Nov-2026; live:")

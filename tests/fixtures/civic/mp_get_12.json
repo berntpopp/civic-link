@@ -472,6 +472,17 @@
     }
    ]
   },
+  "rejected_assertions": {
+   "nodes": [
+    {
+     "assertionType": "PREDICTIVE",
+     "id": 12,
+     "name": "AID12",
+     "status": "REJECTED"
+    }
+   ],
+   "totalCount": 1
+  },
   "status_accepted": {
    "totalCount": 97
   },

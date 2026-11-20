@@ -60,6 +60,9 @@ query MpGet($molecular_profile_id: Int!) {{
     variants {{ __typename id name feature {{ id name }} }}
     assertions(first: 100) {{ totalCount nodes {{ {_ASSERTION_ROW} }} }}
   }}
+  # the profile's assertions connection silently omits REJECTED ones
+  rejected_assertions: assertions(molecularProfileId: $molecular_profile_id, status: REJECTED,
+                                  first: 100) {{ totalCount nodes {{ {_ASSERTION_ROW} }} }}
 {_LIVE_COUNTS}
 }}
 """

@@ -50,6 +50,10 @@
     }
    ]
   },
+  "rejected_assertions": {
+   "nodes": [],
+   "totalCount": 0
+  },
   "status_accepted": {
    "totalCount": 21
   },

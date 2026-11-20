@@ -255,7 +255,10 @@ class CivicService:
             raise self._missing("molecular_profile_id", "molecular profile")
         detail = mp_detail(raw, data)
         conn = raw.get("assertions") or {}
-        rows = [assertion_row(a, "compact") for a in conn.get("nodes") or []]
+        rejected = data.get("rejected_assertions") or {}  # absent from conn upstream
+        nodes = (conn.get("nodes") or []) + (rejected.get("nodes") or [])
+        rows = [assertion_row(a, "compact") for a in nodes]
+        total = (conn.get("totalCount") or 0) + (rejected.get("totalCount") or 0)
         # ACCEPTED in full (as search_assertions defaults); unreviewed/rejected as stubs only
         accepted_assertions = [a for a in rows if a["status"] == "ACCEPTED"]
         stub = ("id", "name", "status", "assertion_type")
@@ -264,8 +267,8 @@ class CivicService:
             "molecular_profile": detail,
             "assertions": accepted_assertions,
             "other_assertions": others,
-            "assertions_total": conn.get("totalCount", len(rows)),
-            "assertions_truncated": (conn.get("totalCount") or 0) > len(rows),
+            "assertions_total": total,
+            "assertions_truncated": total > len(rows),
         }
         if raw.get("isComplex"):
             payload["complex_note"] = COMPLEX_NOTE
