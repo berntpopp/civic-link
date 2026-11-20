@@ -32,6 +32,9 @@ async def test_name_search_keeps_complex_profiles_out_of_the_simple_answer(
     # honest paging from CIViC's own totalCount (41 profiles mention BRAF V600E)
     assert out["total"] == 41 and out["returned"] == 25
     assert out["truncated"] is True and out["next_offset"] == 25
+    # the fixed notes ride on the first page only; later pages carry rows and paging
+    later = await civic_service.search_molecular_profiles("BRAF V600E", 25, 25)
+    assert "complex_note" not in later and "counts_note" not in later
 
 
 async def test_protein_prefix_in_a_name_query_is_dropped(civic_service: CivicService) -> None:

@@ -209,14 +209,15 @@ class CivicService:
             "simple": [r for r in rows if r["kind"] == "simple"],
             "complex": [r for r in rows if r["kind"] == "complex"],
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
-            "counts_note": COUNTS_NOTE,
         }
         if name != term:
             payload["query_normalized"] = name
         if variant_id is not None:
             payload["variant_id"] = variant_id
-        if payload["complex"]:
-            payload["complex_note"] = COMPLEX_NOTE
+        if offset == 0:  # fixed notes once, on the first page
+            payload["counts_note"] = COUNTS_NOTE
+            if payload["complex"] or total > len(rows):  # complex rows here or on later pages
+                payload["complex_note"] = COMPLEX_NOTE
         return await self._stamp(payload)
 
     @staticmethod
