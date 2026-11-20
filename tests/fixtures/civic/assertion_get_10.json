@@ -1,0 +1,60 @@
+{
+ "data": {
+  "assertion": {
+   "acmgCodes": [],
+   "ampLevel": "TIER_I_LEVEL_A",
+   "assertionDirection": "SUPPORTS",
+   "assertionType": "PREDICTIVE",
+   "clingenCodes": [],
+   "description": "Vemurafenib and cobimetinib combination is an FDA approved first line treatment for BRAF V600E mutant metastatic melanoma based on clinical data including the Phase III coBRIM trial. The cobas 4800 BRAF V600 Mutation Test is approved as an FDA companion test for Cotellic (cobimetinib) in combination with Zelboraf (vemurafenib).",
+   "disease": {
+    "doid": "1909",
+    "name": "Melanoma"
+   },
+   "evidenceItems": [
+    {
+     "id": 6966,
+     "name": "EID6966"
+    },
+    {
+     "id": 6044,
+     "name": "EID6044"
+    },
+    {
+     "id": 1421,
+     "name": "EID1421"
+    }
+   ],
+   "evidenceItemsCount": 3,
+   "fdaCompanionTest": true,
+   "id": 10,
+   "link": "/assertions/10",
+   "molecularProfile": {
+    "id": 12,
+    "name": "BRAF V600E"
+   },
+   "name": "AID10",
+   "nccnGuideline": {
+    "name": "Melanoma"
+   },
+   "nccnGuidelineVersion": "2.2018",
+   "phenotypes": [],
+   "regulatoryApproval": true,
+   "significance": "SENSITIVITYRESPONSE",
+   "status": "ACCEPTED",
+   "summary": "BRAF V600E mutant melanoma is sensitive to vemurafenib and cobimetinib combination therapy",
+   "therapies": [
+    {
+     "name": "Vemurafenib",
+     "ncitId": "C64768"
+    },
+    {
+     "name": "Cobimetinib",
+     "ncitId": "C68923"
+    }
+   ],
+   "therapyInteractionType": "COMBINATION",
+   "variantOrigin": "SOMATIC"
+  }
+ }
+}

@@ -1,0 +1,45 @@
+{
+ "data": {
+  "molecularProfile": {
+   "assertions": {
+    "nodes": [],
+    "totalCount": 0
+   },
+   "deprecated": false,
+   "description": "While the KRAS G12 region is a widely studied recurrent region in cancer, its impact on clinical action is still actively debated. Often associated with tumors that are wild-type for other drivers (EGFR and ALK specifically), the prognosis for patients with this mutation seems to be worse than the KRAS wild-type cohort in patients with colorectal and pancreatic cancer, however this hypothesis is in need of further validation. This mutation, along with the mutations affecting the neighboring G13 position, may result in a less responsive tumor when treated with first-generation TKI's like gefitinib. The NCCN guidelines for colorectal cancer contain recommendations that the targeted therapies cetuximab and panitumumab should only be used in the context of wild type KRAS. However, cetuximab treatment was shown to extend survival in a single cohort of colorectal patients with G12D mutations. Overall, the interpretation for KRAS mutations in most clinical scenarios is still undecided.",
+   "evidenceCountsByStatus": {
+    "acceptedCount": 21,
+    "rejectedCount": 2,
+    "submittedCount": 41
+   },
+   "evidenceCountsByType": {
+    "diagnosticCount": 2,
+    "functionalCount": 0,
+    "oncogenicCount": 0,
+    "predictiveCount": 54,
+    "predisposingCount": 0,
+    "prognosticCount": 6
+   },
+   "id": 79,
+   "isComplex": false,
+   "link": "/molecular-profiles/79",
+   "molecularProfileAliases": [
+    "GLY12ASP",
+    "RS121913529"
+   ],
+   "molecularProfileScore": 157.0,
+   "name": "KRAS G12D",
+   "variants": [
+    {
+     "__typename": "GeneVariant",
+     "feature": {
+      "id": 30,
+      "name": "KRAS"
+     },
+     "id": 79,
+     "name": "G12D"
+    }
+   ]
+  }
+ }
+}

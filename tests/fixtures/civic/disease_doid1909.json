@@ -1,0 +1,14 @@
+{
+ "data": {
+  "diseases": {
+   "nodes": [
+    {
+     "doid": "1909",
+     "id": 7,
+     "name": "Melanoma"
+    }
+   ],
+   "totalCount": 1
+  }
+ }
+}

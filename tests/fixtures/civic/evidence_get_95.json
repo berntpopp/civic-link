@@ -1,0 +1,45 @@
+{
+ "data": {
+  "evidenceItem": {
+   "assertions": [],
+   "description": "Dabrafenib with trametinib provides higher response rate and lower toxicity (as compared to chemotherapy) in patients with melanoma.",
+   "disease": {
+    "doid": "1909",
+    "name": "Melanoma"
+   },
+   "evidenceDirection": "SUPPORTS",
+   "evidenceLevel": "B",
+   "evidenceRating": 5,
+   "evidenceType": "PREDICTIVE",
+   "id": 95,
+   "link": "/evidence/95",
+   "molecularProfile": {
+    "id": 12,
+    "name": "BRAF V600E"
+   },
+   "name": "EID95",
+   "phenotypes": [],
+   "significance": "SENSITIVITYRESPONSE",
+   "source": {
+    "citation": "Menzies et al., 2014",
+    "citationId": "24583796",
+    "clinicalTrials": [],
+    "sourceType": "PUBMED",
+    "title": "Dabrafenib and trametinib, alone and in combination for BRAF-mutant metastatic melanoma."
+   },
+   "status": "ACCEPTED",
+   "therapies": [
+    {
+     "name": "Dabrafenib",
+     "ncitId": "C82386"
+    },
+    {
+     "name": "Trametinib",
+     "ncitId": "C77908"
+    }
+   ],
+   "therapyInteractionType": "COMBINATION",
+   "variantOrigin": "SOMATIC"
+  }
+ }
+}

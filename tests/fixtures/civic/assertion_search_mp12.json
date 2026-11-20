@@ -1,0 +1,234 @@
+{
+ "data": {
+  "assertions": {
+   "nodes": [
+    {
+     "acmgCodes": [],
+     "ampLevel": null,
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "ONCOGENIC",
+     "clingenCodes": [
+      {
+       "code": "OS2"
+      },
+      {
+       "code": "OS3"
+      },
+      {
+       "code": "OP1"
+      },
+      {
+       "code": "OP4"
+      }
+     ],
+     "disease": {
+      "doid": "9256",
+      "name": "Colorectal Cancer"
+     },
+     "fdaCompanionTest": null,
+     "id": 286,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "AID286",
+     "nccnGuideline": null,
+     "nccnGuidelineVersion": null,
+     "regulatoryApproval": null,
+     "significance": "ONCOGENIC",
+     "status": "ACCEPTED",
+     "summary": "BRAF V600E is oncogenic in colorectal cancer.",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "acmgCodes": [],
+     "ampLevel": "TIER_I_LEVEL_A",
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "PROGNOSTIC",
+     "clingenCodes": [],
+     "disease": {
+      "doid": "9256",
+      "name": "Colorectal Cancer"
+     },
+     "fdaCompanionTest": null,
+     "id": 20,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "AID20",
+     "nccnGuideline": {
+      "name": "Colon Cancer"
+     },
+     "nccnGuidelineVersion": "2.2017",
+     "regulatoryApproval": null,
+     "significance": "POOR_OUTCOME",
+     "status": "ACCEPTED",
+     "summary": "BRAF V600E indicates poor prognosis in advanced colorectal cancer",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "acmgCodes": [],
+     "ampLevel": null,
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "ONCOGENIC",
+     "clingenCodes": [
+      {
+       "code": "OS2"
+      },
+      {
+       "code": "OS3"
+      },
+      {
+       "code": "OP1"
+      },
+      {
+       "code": "OP4"
+      }
+     ],
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "fdaCompanionTest": null,
+     "id": 281,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "AID281",
+     "nccnGuideline": null,
+     "nccnGuidelineVersion": null,
+     "regulatoryApproval": null,
+     "significance": "ONCOGENIC",
+     "status": "ACCEPTED",
+     "summary": "BRAF V600E is oncogenic in melanoma.",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "acmgCodes": [],
+     "ampLevel": null,
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "ONCOGENIC",
+     "clingenCodes": [
+      {
+       "code": "OS2"
+      },
+      {
+       "code": "OS3"
+      },
+      {
+       "code": "OP1"
+      },
+      {
+       "code": "OP4"
+      }
+     ],
+     "disease": {
+      "doid": "0080522",
+      "name": "Anaplastic Thyroid Carcinoma"
+     },
+     "fdaCompanionTest": null,
+     "id": 270,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "AID270",
+     "nccnGuideline": null,
+     "nccnGuidelineVersion": null,
+     "regulatoryApproval": null,
+     "significance": "ONCOGENIC",
+     "status": "ACCEPTED",
+     "summary": "BRAF V600E is oncogenic in anaplastic thyroid carcinoma.",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "acmgCodes": [],
+     "ampLevel": "TIER_I_LEVEL_A",
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "PREDICTIVE",
+     "clingenCodes": [],
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "fdaCompanionTest": true,
+     "id": 7,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "AID7",
+     "nccnGuideline": {
+      "name": "Melanoma"
+     },
+     "nccnGuidelineVersion": "2.2018",
+     "regulatoryApproval": true,
+     "significance": "SENSITIVITYRESPONSE",
+     "status": "ACCEPTED",
+     "summary": "BRAF V600E mutant melanoma is sensitive to dabrafenib and trametinib combination therapy",
+     "therapies": [
+      {
+       "name": "Trametinib",
+       "ncitId": "C77908"
+      },
+      {
+       "name": "Dabrafenib",
+       "ncitId": "C82386"
+      }
+     ],
+     "therapyInteractionType": "COMBINATION",
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "acmgCodes": [],
+     "ampLevel": "TIER_I_LEVEL_A",
+     "assertionDirection": "SUPPORTS",
+     "assertionType": "PREDICTIVE",
+     "clingenCodes": [],
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "fdaCompanionTest": true,
+     "id": 10,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "AID10",
+     "nccnGuideline": {
+      "name": "Melanoma"
+     },
+     "nccnGuidelineVersion": "2.2018",
+     "regulatoryApproval": true,
+     "significance": "SENSITIVITYRESPONSE",
+     "status": "ACCEPTED",
+     "summary": "BRAF V600E mutant melanoma is sensitive to vemurafenib and cobimetinib combination therapy",
+     "therapies": [
+      {
+       "name": "Vemurafenib",
+       "ncitId": "C64768"
+      },
+      {
+       "name": "Cobimetinib",
+       "ncitId": "C68923"
+      }
+     ],
+     "therapyInteractionType": "COMBINATION",
+     "variantOrigin": "SOMATIC"
+    }
+   ],
+   "totalCount": 6
+  }
+ }
+}

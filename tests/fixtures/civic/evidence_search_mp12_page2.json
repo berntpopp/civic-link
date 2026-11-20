@@ -1,0 +1,343 @@
+{
+ "data": {
+  "evidenceItems": {
+   "nodes": [
+    {
+     "description": "In patients with papillary thyroid cancer harboring both BRAF V600E and the TERT promotor mutation C228T (N=35), recurrence-free survival is worse than in patients harboring one of these mutations (N=159 BRAF, N=26 TERT promoter mutated) or no mutations in either gene (N=287)(P<0.001).",
+     "disease": {
+      "doid": "3969",
+      "name": "Papillary Thyroid Carcinoma"
+     },
+     "evidenceDirection": "SUPPORTS",
+     "evidenceLevel": "B",
+     "evidenceRating": 5,
+     "evidenceType": "PROGNOSTIC",
+     "id": 656,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID656",
+     "significance": "POOR_OUTCOME",
+     "source": {
+      "citation": "Xing et al., 2014",
+      "citationId": "25024077",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "The BRIM-3 Phase III trial NCT01006980 assessed BRAF inhibitor vemurafenib versus dacarbazine in 598 patients with treatment naive metastatic melanoma and confirmed V600E mutation. Significant differences were seen in overall survival (13.3 months with vemurafenib vs. 10.0 months with dacarbazine) and median progression free survival (6.9 months  with vemurafenib vs. 1.6 months with dacarbazine)",
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "evidenceDirection": "SUPPORTS",
+     "evidenceLevel": "B",
+     "evidenceRating": 5,
+     "evidenceType": "PREDICTIVE",
+     "id": 1398,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID1398",
+     "significance": "SENSITIVITYRESPONSE",
+     "source": {
+      "citation": "McArthur et al., 2014",
+      "citationId": "24508103",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [
+      {
+       "name": "Vemurafenib",
+       "ncitId": "C64768"
+      }
+     ],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "Adjuvant dual treatment with BRAF inhibitor dabrafenib and MEK inhibitor trametinib was administered to patients with stage III resected melenoma with V600E or V600K mutation in this stage III trial (COMBO-AD, NCT01682083). 792 (91%) patients had V600E, and were administered dabrafenib and trametinib or placebo for 12 months. In subsequent analysis, relapse or death occurred in 150/397 patients (38%) in the treatment group and 229/395 patients (58%) in the placebo group for a 95% CI Hazard Ratio of 0.48 (0.39-0.58).",
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "evidenceDirection": "SUPPORTS",
+     "evidenceLevel": "B",
+     "evidenceRating": 5,
+     "evidenceType": "PREDICTIVE",
+     "id": 6178,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID6178",
+     "significance": "SENSITIVITYRESPONSE",
+     "source": {
+      "citation": "Long et al., 2017",
+      "citationId": "28891408",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [
+      {
+       "name": "Dabrafenib",
+       "ncitId": "C82386"
+      },
+      {
+       "name": "Trametinib",
+       "ncitId": "C77908"
+      }
+     ],
+     "therapyInteractionType": "COMBINATION",
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "In this Phase III trial (NCT01584648 COMBI-d), previously untreated patients with unresectable stage IIIC or IV melanoma with BRAF V600E (359 patients) or V600K (61 patients) received dabrafenib and trametinib or dabrafenib alone with primary endpoint of progression free survival and secondary endpoints including disease response. The hazard ratio for progression or death in the V600E group was 0.81 for dabrafenib-trametinib vs dabrafenib-alone. Of 179 V600E patients in the dabrafenib-trametinib group, 68% of patients had a response, which was 15 percentage points higher than in the dabrafenib-alone group (95% CI, 4 to 24; P=0.006).",
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "evidenceDirection": "SUPPORTS",
+     "evidenceLevel": "B",
+     "evidenceRating": 5,
+     "evidenceType": "PREDICTIVE",
+     "id": 6938,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID6938",
+     "significance": "SENSITIVITYRESPONSE",
+     "source": {
+      "citation": "Long et al., 2014",
+      "citationId": "25265492",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [
+      {
+       "name": "Dabrafenib",
+       "ncitId": "C82386"
+      },
+      {
+       "name": "Trametinib",
+       "ncitId": "C77908"
+      }
+     ],
+     "therapyInteractionType": "COMBINATION",
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "665 patients with BRAF V600E-mutated metastatic CRC were enrolled In this open-label, phase 3 trial. Patients were randomly assigned in a 1:1:1 ratio to receive encorafenib, binimetinib, and cetuximab (triplet-therapy group); encorafenib and cetuximab (doublet-therapy group); or the investigators\u2019 choice of either cetuximab and irinotecan or cetuximab and FOLFIRI. The median overall survival was 9.0 months in the triplet-therapy group and 5.4 months in the control group (hazard ratio for death, 0.52; 95% confidence interval [CI], 0.39 to 0.70; P<0.001). The confirmed response rate was 26% (95% CI, 18 to 35) in the triplet-therapy group and 2% (95% CI, 0 to 7) in the control group (triplet group vs. control P<0.001). The median progression-free survival in the triplet-therapy group was 4.3 months (95% CI, 4.1 to 5.2) and 1.5 months (95% CI, 1.5 to 1.7) in the control group (hazard ratio for disease progression or death, 0.38; 95% CI, 0.29 to 0.49; P<0.001).",
+     "disease": {
+      "doid": "9256",
+      "name": "Colorectal Cancer"
+     },
+     "evidenceDirection": "SUPPORTS",
+     "evidenceLevel": "B",
+     "evidenceRating": 5,
+     "evidenceType": "PREDICTIVE",
+     "id": 7612,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID7612",
+     "significance": "SENSITIVITYRESPONSE",
+     "source": {
+      "citation": "Kopetz et al., 2019",
+      "citationId": "31566309",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [
+      {
+       "name": "Encorafenib",
+       "ncitId": "C98283"
+      },
+      {
+       "name": "Binimetinib",
+       "ncitId": "C84865"
+      },
+      {
+       "name": "Cetuximab",
+       "ncitId": "C1723"
+      }
+     ],
+     "therapyInteractionType": "COMBINATION",
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "This meta-analysis of 7 randomized control trials evaluating overall survival (OS) (8 for progression free survival) could not definitely state that survival benefit of anti-EGFR monoclonal antibodies is limited to patients with wild type BRAF. In other words, the authors believe that there is insufficient data to justify the exclusion of anti-EGFR monoclonal antibody therapy for patients with mutant BRAF. In these studies, mutant BRAF specifically meant the V600E mutation.",
+     "disease": {
+      "doid": "9256",
+      "name": "Colorectal Cancer"
+     },
+     "evidenceDirection": "DOES_NOT_SUPPORT",
+     "evidenceLevel": "B",
+     "evidenceRating": 4,
+     "evidenceType": "PREDICTIVE",
+     "id": 816,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID816",
+     "significance": "RESISTANCE",
+     "source": {
+      "citation": "Rowland et al., 2015",
+      "citationId": "25989278",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [
+      {
+       "name": "Cetuximab",
+       "ncitId": "C1723"
+      },
+      {
+       "name": "Panitumumab",
+       "ncitId": "C1857"
+      }
+     ],
+     "therapyInteractionType": "SUBSTITUTES",
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "In 47 patients with Hairy Cell Leukemia, sequencing discovered a V600E mutation in all 47 of the sequenced patients.",
+     "disease": {
+      "doid": "285",
+      "name": "Hairy Cell Leukemia"
+     },
+     "evidenceDirection": "SUPPORTS",
+     "evidenceLevel": "B",
+     "evidenceRating": 4,
+     "evidenceType": "DIAGNOSTIC",
+     "id": 1127,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID1127",
+     "significance": "POSITIVE",
+     "source": {
+      "citation": "Tiacci et al., 2011",
+      "citationId": "21663470",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "In this Phase II pilot study (NCT00405587) of BRAF V600 inhibitor vemurafenib in 21 metastatic colorectal cancer (CRC) patients with BRAF V600E, one patient had a durable 21 week partial response, and seven patients had 8 week stable disease as best response. Median progression free survival was 2.1 months and median overall survival was 7.7 months. The authors conclude that single agent vemurafenib did not show meaningful activity in V600E CRC, in contrast to the significant vemurafenib activity against V600 in melanoma.",
+     "disease": {
+      "doid": "9256",
+      "name": "Colorectal Cancer"
+     },
+     "evidenceDirection": "DOES_NOT_SUPPORT",
+     "evidenceLevel": "B",
+     "evidenceRating": 4,
+     "evidenceType": "PREDICTIVE",
+     "id": 1405,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID1405",
+     "significance": "SENSITIVITYRESPONSE",
+     "source": {
+      "citation": "Kopetz et al., 2015",
+      "citationId": "26460303",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [
+      {
+       "name": "Vemurafenib",
+       "ncitId": "C64768"
+      }
+     ],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "In this Phase III trial (coBRIM, NCT01689519) of 495 V600 mutant melanoma patients, 344 had V600E mutation. 174 patients were treated with vemurafenib and placebo, and 170 were treated with vemurafenib and cobimetinib and tested for progression free survival. 88 of 174 monotherapy group patients had an event with median progression free survival of 6.5 months. In the combination group 58 of 174 patients had an event with median progression-free survival not met, however, when in combination with other V600 mutations median progression-free survival was 9.9 months with combination treatment. Median time to followup for the whole cohort was 7.3 months. Hazard Ratio for progression or death was 0.57 (0.41-0.80).",
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "evidenceDirection": "SUPPORTS",
+     "evidenceLevel": "B",
+     "evidenceRating": 4,
+     "evidenceType": "PREDICTIVE",
+     "id": 1421,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID1421",
+     "significance": "SENSITIVITYRESPONSE",
+     "source": {
+      "citation": "Larkin et al., 2014",
+      "citationId": "25265494",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [
+      {
+       "name": "Vemurafenib",
+       "ncitId": "C64768"
+      },
+      {
+       "name": "Cobimetinib",
+       "ncitId": "C68923"
+      }
+     ],
+     "therapyInteractionType": "COMBINATION",
+     "variantOrigin": "SOMATIC"
+    },
+    {
+     "description": "Multicenter, phase 1, dose-escalation trial of PLX4032 (Vemurafenib). Treatment of metastatic melanoma with PLX4032 in patients with tumors that carry the V600E BRAF mutation resulted in complete or partial tumor regression in the majority of patients (N=37/48). Patients without the V600E mutation had evidence of tumor regression.",
+     "disease": {
+      "doid": "1909",
+      "name": "Melanoma"
+     },
+     "evidenceDirection": "SUPPORTS",
+     "evidenceLevel": "B",
+     "evidenceRating": 4,
+     "evidenceType": "PREDICTIVE",
+     "id": 1749,
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID1749",
+     "significance": "SENSITIVITYRESPONSE",
+     "source": {
+      "citation": "Flaherty et al., 2010",
+      "citationId": "20818844",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED",
+     "therapies": [
+      {
+       "name": "Vemurafenib",
+       "ncitId": "C64768"
+      }
+     ],
+     "therapyInteractionType": null,
+     "variantOrigin": "SOMATIC"
+    }
+   ],
+   "totalCount": 97
+  }
+ }
+}

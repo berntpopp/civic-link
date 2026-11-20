@@ -1,0 +1,289 @@
+{
+ "data": {
+  "molecularProfiles": {
+   "nodes": [
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 96,
+      "submittedCount": 119
+     },
+     "id": 12,
+     "isComplex": false,
+     "molecularProfileAliases": [
+      "RS113488022",
+      "VAL600GLU",
+      "V640E",
+      "VAL640GLU"
+     ],
+     "name": "BRAF V600E"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 4707,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E OR BRAF K601E"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 5175,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND MSI Low"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 4174,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF Amplification AND ( BRAF V600E OR BRAF V600K )"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 4170,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND BRAF V600M"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 1
+     },
+     "id": 4173,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND BRAF Amplification"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 1
+     },
+     "id": 4213,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "NOT KRAS Mutation AND ( BRAF V600E OR BRAF D594G )"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 4241,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND EZH2 Y646F"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 1
+     },
+     "id": 4251,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND EGFR L858R AND EGFR T790M"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 1
+     },
+     "id": 4452,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND CDKN2A Deletion AND CDKN2B Deletion AND TET2 E796K AND BAX L76R AND AXIN2 P455K"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 1
+     },
+     "id": 4453,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E OR KIAA1549::BRAF Fusion"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 4715,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E OR NRAS Mutation OR HRAS Mutation OR KRAS Mutation OR NF1 Mutation"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 4748,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E OR NRAS Mutation OR HRAS Mutation OR KRAS Mutation OR NF1 Inactivating Mutation"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 1
+     },
+     "id": 4765,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND ERBB2 Amplification AND SMAD4 LOSS AND TP53 V218E"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 5379,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND NF1 Loss"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 0
+     },
+     "id": 5480,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND AKT1 Overexpression"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 0
+     },
+     "id": 5481,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND AKT3 E17K"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 0
+     },
+     "id": 5482,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND AKT1 Q79K"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 0
+     },
+     "id": 5483,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND AKT3 Overexpression"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 1
+     },
+     "id": 5484,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "AKT1 E17K AND BRAF V600E"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 1
+     },
+     "id": 5490,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND MAP2K1 C121S"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 5491,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND GNAS R201C"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 1,
+      "submittedCount": 0
+     },
+     "id": 5492,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND ARAF S490T"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 0,
+      "submittedCount": 1
+     },
+     "id": 5493,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E AND MAP2K1 K57T"
+    },
+    {
+     "deprecated": false,
+     "evidenceCountsByStatus": {
+      "acceptedCount": 2,
+      "submittedCount": 0
+     },
+     "id": 5666,
+     "isComplex": true,
+     "molecularProfileAliases": [],
+     "name": "BRAF V600E OR BRAF V600K"
+    }
+   ],
+   "totalCount": 40
+  }
+ }
+}

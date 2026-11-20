@@ -1,0 +1,69 @@
+{
+ "data": {
+  "genes": {
+   "nodes": [
+    {
+     "description": "Mutations in the RAS family of proteins are frequently observed across cancer types. The amino acid positions that account for the overwhelming majority of these mutations are G12, G13 and Q61. The different protein isoforms, despite their raw similarity, also behave very differently when expressed in non-native tissue types, likely due to differences in the C-terminal hyper-variable regions. Mis-regulation of isoform expression has been shown to be a driving event in cancer, as well as missense mutations at the three hotspots previously mentioned. While highly recurrent in cancer, attempts to target these RAS mutants with inhibitors have not been successful, and has not yet become common practice in the clinic. The prognostic implications for KRAS mutations vary between cancer types, but have been shown to be associated with poor outcome in colorectal cancer, non-small cell lung cancer, and others.",
+     "entrezId": 3845,
+     "featureAliases": [
+      "'C-K-RAS",
+      "C-K-RAS",
+      "CFC2",
+      "K-RAS2A",
+      "K-RAS2B",
+      "K-RAS4A",
+      "K-RAS4B",
+      "K-Ras",
+      "K-Ras 2",
+      "KI-RAS",
+      "KRAS",
+      "KRAS1",
+      "KRAS2",
+      "NS",
+      "NS3",
+      "OES",
+      "RALD",
+      "RALD2",
+      "RASK2",
+      "c-Ki-ras",
+      "c-Ki-ras2"
+     ],
+     "fullName": "KRas proto-oncogene, GTPase",
+     "id": 30,
+     "link": "/features/30",
+     "name": "KRAS",
+     "variants": {
+      "nodes": [
+       {
+        "id": 3342,
+        "name": "A11_G12insGA",
+        "singleVariantMolecularProfileId": 3210
+       },
+       {
+        "id": 2979,
+        "name": "A146",
+        "singleVariantMolecularProfileId": 2848
+       },
+       {
+        "id": 905,
+        "name": "A146P",
+        "singleVariantMolecularProfileId": 879
+       },
+       {
+        "id": 906,
+        "name": "A146T",
+        "singleVariantMolecularProfileId": 880
+       },
+       {
+        "id": 322,
+        "name": "A146V",
+        "singleVariantMolecularProfileId": 318
+       }
+      ],
+      "totalCount": 63
+     }
+    }
+   ]
+  }
+ }
+}
