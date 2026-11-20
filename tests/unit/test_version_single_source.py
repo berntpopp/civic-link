@@ -38,3 +38,10 @@ def test_health_version_matches_package() -> None:
     resp = TestClient(create_app()).get("/health")
     assert resp.status_code == 200
     assert resp.json()["version"] == version(DIST)
+
+
+def test_build_info_is_fixed_at_startup(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """The sha names the code that is running, not a later checkout of the source tree."""
+    first = build_info()
+    monkeypatch.setenv("CIVIC_LINK_GIT_SHA", "deadbeef0000")
+    assert build_info() == first

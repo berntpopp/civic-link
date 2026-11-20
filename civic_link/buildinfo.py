@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 from datetime import UTC, datetime
+from functools import cache
 from pathlib import Path
 
 from civic_link import __version__
@@ -49,6 +50,7 @@ def _built_at_fallback() -> str | None:
         return None
 
 
+@cache  # resolved once: a later commit in a source checkout is not the running code
 def build_info() -> dict[str, str | None]:
     """Return version + git sha + build time (env-injected, else resolved locally)."""
     return {
