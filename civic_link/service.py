@@ -37,10 +37,13 @@ from civic_link.shaping import (
     SYMBOL,
     WS,
     VariantIndex,
+    assertion_evidence,
     assertion_row,
     cursor,
     evidence_row,
     fence,
+    gene_detail,
+    gene_variant,
     hgvs_key,
     mp_detail,
     mp_row,
@@ -255,23 +258,20 @@ class CivicService:
         rows = [assertion_row(a, "compact") for a in conn.get("nodes") or []]
         # ACCEPTED in full (as search_assertions defaults); unreviewed/rejected as stubs only
         accepted_assertions = [a for a in rows if a["status"] == "ACCEPTED"]
+        stub = ("id", "name", "status", "assertion_type")
+        others = [{k: a[k] for k in stub} for a in rows if a["status"] != "ACCEPTED"]
         payload: dict[str, Any] = {
             "molecular_profile": detail,
             "assertions": accepted_assertions,
-            "other_assertions": [
-                {k: a[k] for k in ("id", "name", "status", "assertion_type")}
-                for a in rows
-                if a["status"] != "ACCEPTED"
-            ],
+            "other_assertions": others,
             "assertions_total": conn.get("totalCount", len(rows)),
             "assertions_truncated": (conn.get("totalCount") or 0) > len(rows),
         }
         if raw.get("isComplex"):
             payload["complex_note"] = COMPLEX_NOTE
         if not accepted_assertions:
-            payload["evidence_note"] = (
-                NO_ASSERTION if detail["accepted_evidence_count"] else NO_EVIDENCE
-            )
+            has_evidence = detail["accepted_evidence_count"]
+            payload["evidence_note"] = NO_ASSERTION if has_evidence else NO_EVIDENCE
         return await self._stamp(payload)
 
     @staticmethod
@@ -310,12 +310,8 @@ class CivicService:
             "first": limit,
             "after": cursor(offset),
         }
-        fields = {
-            **_PAGING_FIELDS,
-            "disease_name": "disease",
-            "disease_id": "disease",
-            "therapy_name": "therapy",
-            "therapy_id": "therapy",
+        fields = _PAGING_FIELDS | {
+            f"{k}_{s}": k for k in ("disease", "therapy") for s in ("name", "id")
         }
         conn = (await self.client.graphql(document, variables, fields=fields)).get(root) or {}
         total = int(conn.get("totalCount") or 0)
@@ -439,19 +435,7 @@ class CivicService:
         item["phenotypes"] = [
             {"hpo": p.get("hpoId"), "name": p.get("name")} for p in raw.get("phenotypes") or []
         ]
-        item["evidence_items"] = [
-            {
-                "id": e.get("id"),
-                "name": e.get("name"),
-                "status": e.get("status"),
-                "evidence_level": e.get("evidenceLevel"),
-                "molecular_profile": e.get("molecularProfile"),
-                "pmid": (e.get("source") or {}).get("citationId")
-                if (e.get("source") or {}).get("sourceType") == "PUBMED"
-                else None,
-            }
-            for e in raw.get("evidenceItems") or []
-        ]
+        item["evidence_items"] = [assertion_evidence(e) for e in raw.get("evidenceItems") or []]
         item["evidence_items_count"] = raw.get("evidenceItemsCount")
         item["url"] = SITE + str(raw.get("link") or "")
         return await self._stamp({"assertion": item})
@@ -498,28 +482,10 @@ class CivicService:
             )
         raw = nodes[0]
         conn = raw.get("variants") or {}
-        variants = [
-            {
-                "id": v.get("id"),
-                "name": v.get("name"),
-                "single_variant_molecular_profile_id": v.get("singleVariantMolecularProfileId"),
-            }
-            for v in conn.get("nodes") or []
-        ]
+        variants = [gene_variant(v) for v in conn.get("nodes") or []]
         return await self._stamp(
             {
-                "gene": {
-                    "id": raw.get("id"),
-                    "symbol": raw.get("name"),
-                    "full_name": raw.get("fullName"),
-                    "entrez_id": raw.get("entrezId"),
-                    "aliases": raw.get("featureAliases") or [],
-                    # the curator summary once, on the first page only
-                    "description": fence(raw.get("description"), str(raw.get("name")))
-                    if offset == 0
-                    else None,
-                    "url": SITE + str(raw.get("link") or ""),
-                },
+                "gene": gene_detail(raw, first_page=offset == 0),
                 "variants": variants,
                 **page_block(
                     total=int(conn.get("totalCount") or 0),

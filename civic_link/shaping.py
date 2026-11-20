@@ -347,3 +347,38 @@ def variant_detail(raw: dict[str, Any]) -> dict[str, Any]:
     if raw.get("__typename") == "FactorVariant":
         out["ncit"] = raw.get("ncitId")
     return out
+
+
+def assertion_evidence(e: dict[str, Any]) -> dict[str, Any]:
+    """An evidence item behind an assertion: enough to see its status, level, profile, PMID."""
+    source = e.get("source") or {}
+    return {
+        "id": e.get("id"),
+        "name": e.get("name"),
+        "status": e.get("status"),
+        "evidence_level": e.get("evidenceLevel"),
+        "molecular_profile": e.get("molecularProfile"),
+        "pmid": source.get("citationId") if source.get("sourceType") == "PUBMED" else None,
+    }
+
+
+def gene_variant(v: dict[str, Any]) -> dict[str, Any]:
+    """A variant row of get_gene."""
+    return {
+        "id": v.get("id"),
+        "name": v.get("name"),
+        "single_variant_molecular_profile_id": v.get("singleVariantMolecularProfileId"),
+    }
+
+
+def gene_detail(raw: dict[str, Any], *, first_page: bool) -> dict[str, Any]:
+    """A CIViC gene; the curator summary is sent on the first page only."""
+    return {
+        "id": raw.get("id"),
+        "symbol": raw.get("name"),
+        "full_name": raw.get("fullName"),
+        "entrez_id": raw.get("entrezId"),
+        "aliases": raw.get("featureAliases") or [],
+        "description": fence(raw.get("description"), str(raw.get("name"))) if first_page else None,
+        "url": SITE + str(raw.get("link") or ""),
+    }
