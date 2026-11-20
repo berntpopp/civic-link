@@ -119,6 +119,17 @@ async def test_capabilities_and_diagnostics(facade: Any, call_tool: Any) -> None
     caps = await call_tool(facade, "get_server_capabilities", {})
     assert caps["tools"] == TOOLS and caps["research_use_only"] is True
     assert "CC0" in caps["license"] and "28138153" in caps["recommended_citation"]
+    async with Client(facade) as client:
+        schemas = {t.name: t.input_schema["properties"] for t in await client.list_tools()}
+    paged = {name: props["limit"] for name, props in schemas.items() if "limit" in props}
+    # contract truth: the advertised per-tool limits are the schema's own
+    assert caps["limits"]["per_tool"] == {
+        name: {
+            "default": int(lim["description"].split("default ")[1].split(",")[0]),
+            "max": lim["maximum"],
+        }
+        for name, lim in paged.items()
+    }
     diag = await call_tool(facade, "get_diagnostics", {})
     assert diag["upstream"]["base_url"] == "https://civicdb.org"
 
