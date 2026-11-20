@@ -30,6 +30,7 @@ from civic_link.shaping import (
     NO_ASSERTION,
     NO_EVIDENCE,
     NOT_A_REPORT,
+    ROUTER_ONLY,
     P_DOT,
     SITE,
     SYMBOL,
@@ -117,7 +118,10 @@ class CivicService:
             raise NotFoundError(
                 "No CIViC disease matches `disease`.",
                 field="disease",
-                hint="Give a DOID (DOID:1909) or a disease name as CIViC writes it (Melanoma).",
+                hint=(
+                    "Give a DOID (DOID:1909) or a disease name as CIViC writes it (Melanoma). "
+                    + ROUTER_ONLY.format(tool="mondo_resolve_disease")
+                ),
                 next_commands=[cmd("mondo_resolve_disease", query=disease.strip())],
             )
         if match:
@@ -460,6 +464,7 @@ class CivicService:
                 "HGNC ID lookup.",
                 field="gene",
                 allowed_values=["HGNC symbol (BRAF)", "NCBI Gene ID (NCBIGene:673 or 673)"],
+                hint=ROUTER_ONLY.format(tool="hgnc_resolve_symbol"),
                 next_commands=[cmd("hgnc_resolve_symbol", query=value)],
                 recovery_action="reformulate_input",
             )
@@ -483,7 +488,8 @@ class CivicService:
             raise NotFoundError(
                 "CIViC curates no gene with this `gene`.",
                 field="gene",
-                hint="CIViC covers ~750 cancer genes; check the symbol with hgnc_resolve_symbol.",
+                hint="CIViC covers ~750 cancer genes; check the symbol. "
+                + ROUTER_ONLY.format(tool="hgnc_resolve_symbol"),
                 next_commands=[cmd("hgnc_resolve_symbol", query=value)],
             )
         raw = nodes[0]

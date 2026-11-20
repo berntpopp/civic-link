@@ -112,6 +112,7 @@ async def test_foreign_gene_id_is_rejected_with_a_converter(facade: Any) -> None
     assert body["_meta"]["next_commands"] == [
         {"tool": "hgnc_resolve_symbol", "arguments": {"query": "ENSG00000133703"}}
     ]
+    assert "not a tool of this server" in body["hint"]  # standalone callers lack it
 
 
 async def test_capabilities_and_diagnostics(facade: Any, call_tool: Any) -> None:

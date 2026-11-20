@@ -43,7 +43,7 @@ CIVIC_SERVER_INSTRUCTIONS = (
     "\n"
     "Axes are separate fields: actionability (AMP/ASCO/CAP tier and level), oncogenicity "
     "(ClinGen/CGC/VICC, Horak 2022) and germline pathogenicity (ACMG/AMP). Diseases are "
-    "DOID; mondo_resolve_disease crosswalks them. CIViC's primary coordinates are GRCh37; "
+    "DOID (behind the genefoundry router, mondo_resolve_disease crosswalks them). CIViC's primary coordinates are GRCh37; "
     "every coordinate and genomic HGVS names its assembly.\n"
     "\n"
     "Status defaults to ACCEPTED. An empty answer means no CIViC evidence was found, never "
