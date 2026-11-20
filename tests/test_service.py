@@ -258,6 +258,11 @@ async def test_gene_by_symbol_or_ncbi_id_and_foreign_ids_get_a_converter(
         await civic_service.get_gene("NOPE1", 5, 0)
 
 
+async def test_gene_summary_is_sent_on_the_first_page_only(civic_service: CivicService) -> None:
+    assert (await civic_service.get_gene("BRAF", 5, 0))["gene"]["description"]
+    assert (await civic_service.get_gene("BRAF", 5, 5))["gene"]["description"] is None
+
+
 async def test_limit_never_exceeds_the_silent_upstream_page_cap(
     civic_service: CivicService,
 ) -> None:

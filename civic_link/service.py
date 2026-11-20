@@ -514,7 +514,10 @@ class CivicService:
                     "full_name": raw.get("fullName"),
                     "entrez_id": raw.get("entrezId"),
                     "aliases": raw.get("featureAliases") or [],
-                    "description": fence(raw.get("description"), str(raw.get("name"))),
+                    # the curator summary once, on the first page only
+                    "description": fence(raw.get("description"), str(raw.get("name")))
+                    if offset == 0
+                    else None,
                     "url": SITE + str(raw.get("link") or ""),
                 },
                 "variants": variants,
