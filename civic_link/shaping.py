@@ -59,6 +59,10 @@ ROUTER_ONLY = (
     "{tool} (next_commands) is a GeneFoundry fleet tool reached through the genefoundry "
     "router, not a tool of this server."
 )
+NAME_MATCH = (
+    "name filter: matches every CIViC name containing it (rows carry each DOID / NCIt); "
+    "a DOID or NCIt code matches that one term exactly, without its subtypes"
+)
 COUNTS_NOTE = (
     "Row evidence counts are CIViC's cached per-profile counters and can lag the live list "
     "by a few items; get_molecular_profile and search_evidence_items count the list itself."

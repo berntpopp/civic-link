@@ -11,6 +11,7 @@ import respx
 from civic_link.api.client import GRAPHQL_PATH
 from civic_link.exceptions import AmbiguousQueryError, InvalidInputError, NotFoundError
 from civic_link.service import CivicService
+from civic_link.shaping import NAME_MATCH
 
 
 def _sent(router: respx.MockRouter, op: str) -> list[dict[str, object]]:
@@ -199,9 +200,13 @@ async def test_disease_and_therapy_filters_never_match_silently(
         with pytest.raises(NotFoundError) as err:
             await civic_service.search_evidence_items(**kwargs)
         assert err.value.extra["field"] == field
-    await civic_service.search_evidence_items(disease="DOID:1909", therapy="Vemurafenib")
+    out = await civic_service.search_evidence_items(disease="DOID:1909", therapy="Vemurafenib")
     sent = _sent(mocked_civic, "EvidenceSearch")[-1]
     assert sent["disease_id"] == 7 and sent["therapy_name"] == "Vemurafenib"
+    # a name widens silently (Melanoma also matches Skin Melanoma): say so; a code is exact
+    assert out["match_notes"] == {"therapy": NAME_MATCH}
+    out = await civic_service.search_evidence_items(disease="Melanoma")
+    assert out["match_notes"] == {"disease": NAME_MATCH}
 
 
 async def test_oncogenic_assertions_carry_only_the_oncogenicity_axis(

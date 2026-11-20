@@ -25,13 +25,14 @@ from civic_link.shaping import (
     DOID_RE,
     FOREIGN_GENE,
     HGVS,
+    NAME_MATCH,
     NCBI_GENE,
     NCIT_RE,
     NO_ASSERTION,
     NO_EVIDENCE,
     NOT_A_REPORT,
-    ROUTER_ONLY,
     P_DOT,
+    ROUTER_ONLY,
     SITE,
     SYMBOL,
     WS,
@@ -329,6 +330,9 @@ class CivicService:
             key: rows,
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
         }
+        notes = {f: NAME_MATCH for f in ("disease", "therapy") if f"{f}_name" in filters}
+        if notes:
+            payload["match_notes"] = notes
         if total == 0:
             payload["evidence_note"] = NO_EVIDENCE
         return await self._stamp(payload)
