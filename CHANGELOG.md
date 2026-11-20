@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-20
+
+Fixes from the agent UX evaluation (`docs/benchmarks/agent-ux-results.md`). No tool or
+parameter changes.
+
+### Fixed
+
+- `get_molecular_profile` counts the live evidence list (CIViC's cached per-profile counters
+  lag it), lists ACCEPTED assertions in full, and lists the others, REJECTED included, in
+  `other_assertions` (CIViC's profile connection omits rejected ones).
+- Errors: a malformed EID/AID names the argument and its string form; an unknown EID/AID points
+  to its own browse tool; a foreign gene ID error also gives a standalone retry; cross-server
+  `next_commands` say they are genefoundry router tools.
+- `search_molecular_profiles` accepts `GENE p.X123Y` and the `ClinVar:<id>` CURIE.
+- Capabilities advertise each paged tool's own default and maximum limit.
+
+### Added
+
+- `search_molecular_profiles`: `simple_total` / `complex_total`, `counts_note`,
+  `query_normalized`; rows drop the redundant per-row `kind`.
+- `search_evidence_items`: `counts_by_level` and `match_notes` (a name widens, a code is
+  exact); minimal rows carry status and the disease name.
+- `get_assertion`: each evidence item's status, level, profile and PMID.
+- Agent UX evaluation protocol, frozen tasks, scripts and results (`docs/benchmarks/`).
+
 ## [0.1.0] - 2026-11-20
 
 ### Added
