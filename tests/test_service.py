@@ -84,12 +84,18 @@ async def test_molecular_profile_keeps_actionability_and_oncogenicity_apart(
 ) -> None:
     out = await civic_service.get_molecular_profile(12)
     mp = out["molecular_profile"]
-    assert mp["kind"] == "simple" and mp["evidence_counts_by_status"]["accepted"] == 96
+    # live list totals, not CIViC's cached counters (which said 96/119/9)
+    assert mp["evidence_counts_by_status"] == {"accepted": 97, "submitted": 121, "rejected": 9}
+    assert mp["kind"] == "simple" and mp["evidence_counts_by_type_accepted"]["predictive"] == 76
+    assert {a["status"] for a in out["assertions"]} == {"ACCEPTED"}
+    assert {a["status"] for a in out["other_assertions"]} == {"SUBMITTED"}
+    assert out["other_assertions"][0].keys() == {"id", "name", "status", "assertion_type"}
     aid10 = next(a for a in out["assertions"] if a["name"] == "AID10")
     assert aid10["actionability"]["amp_tier_level"] == "TIER_I_LEVEL_A"
     assert aid10["oncogenicity"] is None and aid10["germline_pathogenicity"] is None
     assert aid10["disease"] == {"name": "Melanoma", "doid": "DOID:1909"}
-    assert out["assertions_total"] == 11 and out["assertions_truncated"] is False
+    assert out["assertions_total"] == 11 and len(out["assertions"]) == 6
+    assert out["assertions_truncated"] is False
     assert "evidence_note" not in out
     assert out["data_version"].startswith("CIViC 01-Nov-2026; live:")
     assert mp["description"]["kind"] == "untrusted_text"
@@ -206,6 +212,15 @@ async def test_get_assertion_aid10_is_tier_i_level_a(civic_service: CivicService
     assert a["actionability"]["fda_companion_test"] is True
     assert a["summary"]["kind"] == a["description"]["kind"] == "untrusted_text"
     assert [e["id"] for e in a["evidence_items"]] == [6966, 6044, 1421]
+    # enough per item to see that two of AID10's EIDs sit on BRAF V600 (MP17), not V600E
+    assert a["evidence_items"][0] == {
+        "id": 6966,
+        "name": "EID6966",
+        "status": "ACCEPTED",
+        "evidence_level": "B",
+        "molecular_profile": {"id": 17, "name": "BRAF V600"},
+        "pmid": "25037139",
+    }
     assert (
         "not a clinical actionability report"
         in (await civic_service.get_assertion(10))["disclaimer"]

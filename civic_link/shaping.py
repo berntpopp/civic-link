@@ -173,11 +173,20 @@ def mp_row(raw: dict[str, Any]) -> dict[str, Any]:
     return row
 
 
-def mp_detail(raw: dict[str, Any]) -> dict[str, Any]:
-    """One molecular profile: variants, evidence counts, fenced description."""
-    status = raw.get("evidenceCountsByStatus") or {}
+def mp_detail(raw: dict[str, Any], live: dict[str, Any]) -> dict[str, Any]:
+    """One molecular profile: variants, live evidence counts, fenced description.
+
+    ``live`` holds the MpGet root aliases (``status_*``/``accepted_*``): counts of the
+    evidence list itself, which CIViC's cached per-profile counters can lag.
+    """
+
+    def n(alias: str) -> Any:
+        return (live.get(alias) or {}).get("totalCount")
+
     return {
         **mp_row(raw),
+        "accepted_evidence_count": n("status_accepted"),
+        "submitted_evidence_count": n("status_submitted"),
         "aliases": raw.get("molecularProfileAliases") or [],
         "score": raw.get("molecularProfileScore"),
         "variants": [
@@ -190,13 +199,10 @@ def mp_detail(raw: dict[str, Any]) -> dict[str, Any]:
             for v in raw.get("variants") or []
         ],
         "evidence_counts_by_status": {
-            "accepted": status.get("acceptedCount"),
-            "submitted": status.get("submittedCount"),
-            "rejected": status.get("rejectedCount"),
+            s: n(f"status_{s}") for s in ("accepted", "submitted", "rejected")
         },
-        "evidence_counts_by_type_all_statuses": {
-            k.removesuffix("Count") + "_count": v
-            for k, v in (raw.get("evidenceCountsByType") or {}).items()
+        "evidence_counts_by_type_accepted": {
+            k.removeprefix("accepted_"): n(k) for k in live if k.startswith("accepted_")
         },
         "description": fence(raw.get("description"), f"MP{raw.get('id')}"),
         "url": SITE + str(raw.get("link") or ""),

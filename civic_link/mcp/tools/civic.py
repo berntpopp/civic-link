@@ -156,10 +156,11 @@ def register_civic_tools(mcp: FastMCP) -> None:
         output_schema=None,
         tags={"profiles"},
         description=(
-            "Return one molecular profile: its variants, kind (simple/complex), evidence "
-            "counts by status and type, and its assertions, each with actionability (AMP "
-            "tier/level), oncogenicity or germline_pathogenicity as separate fields and a "
-            "DOID disease. evidence_note flags a profile without an accepted assertion: no "
+            "Return one molecular profile: its variants, kind (simple/complex), live evidence "
+            "counts by status (and accepted by type), its ACCEPTED assertions, each with "
+            "actionability (AMP tier/level), oncogenicity or germline_pathogenicity as separate "
+            "fields and a DOID disease, and other_assertions (submitted/rejected: id and status "
+            "only). evidence_note flags a profile without an accepted assertion: no "
             "CIViC evidence is not 'not actionable'. "
             "Signature: get_molecular_profile(molecular_profile_id)."
         ),
@@ -419,7 +420,8 @@ def register_civic_tools(mcp: FastMCP) -> None:
             "Return one assertion: type, direction, actionability (AMP tier/level, FDA "
             "companion test, regulatory approval, NCCN guideline) or oncogenicity / "
             "germline_pathogenicity with their codes, DOID disease, therapies, the fenced "
-            "summary and description, and the evidence items behind it. "
+            "summary and description, and the evidence items behind it (status, level, "
+            "molecular profile, PMID). "
             "Signature: get_assertion(assertion_id)."
         ),
     )

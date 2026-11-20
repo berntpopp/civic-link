@@ -237,25 +237,32 @@ class CivicService:
 
     async def get_molecular_profile(self, molecular_profile_id: int) -> dict[str, Any]:
         """One profile: component variants, evidence counts and its assertions."""
-        raw = (
-            await self.client.graphql(Q.MP_GET, {"molecular_profile_id": molecular_profile_id})
-        ).get("molecularProfile")
+        data = await self.client.graphql(Q.MP_GET, {"molecular_profile_id": molecular_profile_id})
+        raw = data.get("molecularProfile")
         if not raw:
             raise self._missing("molecular_profile_id", "molecular profile")
-        status = raw.get("evidenceCountsByStatus") or {}
+        detail = mp_detail(raw, data)
         conn = raw.get("assertions") or {}
-        assertions = [assertion_row(a, "compact") for a in conn.get("nodes") or []]
-        accepted_assertions = [a for a in assertions if a["status"] == "ACCEPTED"]
+        rows = [assertion_row(a, "compact") for a in conn.get("nodes") or []]
+        # ACCEPTED in full (as search_assertions defaults); unreviewed/rejected as stubs only
+        accepted_assertions = [a for a in rows if a["status"] == "ACCEPTED"]
         payload: dict[str, Any] = {
-            "molecular_profile": mp_detail(raw),
-            "assertions": assertions,
-            "assertions_total": conn.get("totalCount", len(assertions)),
-            "assertions_truncated": (conn.get("totalCount") or 0) > len(assertions),
+            "molecular_profile": detail,
+            "assertions": accepted_assertions,
+            "other_assertions": [
+                {k: a[k] for k in ("id", "name", "status", "assertion_type")}
+                for a in rows
+                if a["status"] != "ACCEPTED"
+            ],
+            "assertions_total": conn.get("totalCount", len(rows)),
+            "assertions_truncated": (conn.get("totalCount") or 0) > len(rows),
         }
         if raw.get("isComplex"):
             payload["complex_note"] = COMPLEX_NOTE
         if not accepted_assertions:
-            payload["evidence_note"] = NO_ASSERTION if status.get("acceptedCount") else NO_EVIDENCE
+            payload["evidence_note"] = (
+                NO_ASSERTION if detail["accepted_evidence_count"] else NO_EVIDENCE
+            )
         return await self._stamp(payload)
 
     @staticmethod
@@ -420,7 +427,19 @@ class CivicService:
         item["phenotypes"] = [
             {"hpo": p.get("hpoId"), "name": p.get("name")} for p in raw.get("phenotypes") or []
         ]
-        item["evidence_items"] = raw.get("evidenceItems") or []
+        item["evidence_items"] = [
+            {
+                "id": e.get("id"),
+                "name": e.get("name"),
+                "status": e.get("status"),
+                "evidence_level": e.get("evidenceLevel"),
+                "molecular_profile": e.get("molecularProfile"),
+                "pmid": (e.get("source") or {}).get("citationId")
+                if (e.get("source") or {}).get("sourceType") == "PUBMED"
+                else None,
+            }
+            for e in raw.get("evidenceItems") or []
+        ]
         item["evidence_items_count"] = raw.get("evidenceItemsCount")
         item["url"] = SITE + str(raw.get("link") or "")
         return await self._stamp({"assertion": item})

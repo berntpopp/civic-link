@@ -13,16 +13,46 @@
    },
    "evidenceItems": [
     {
+     "evidenceLevel": "B",
      "id": 6966,
-     "name": "EID6966"
+     "molecularProfile": {
+      "id": 17,
+      "name": "BRAF V600"
+     },
+     "name": "EID6966",
+     "source": {
+      "citationId": "25037139",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED"
     },
     {
+     "evidenceLevel": "A",
      "id": 6044,
-     "name": "EID6044"
+     "molecularProfile": {
+      "id": 17,
+      "name": "BRAF V600"
+     },
+     "name": "EID6044",
+     "source": {
+      "citationId": "27480103",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED"
     },
     {
+     "evidenceLevel": "B",
      "id": 1421,
-     "name": "EID1421"
+     "molecularProfile": {
+      "id": 12,
+      "name": "BRAF V600E"
+     },
+     "name": "EID1421",
+     "source": {
+      "citationId": "25265494",
+      "sourceType": "PUBMED"
+     },
+     "status": "ACCEPTED"
     }
    ],
    "evidenceItemsCount": 3,

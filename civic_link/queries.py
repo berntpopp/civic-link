@@ -36,18 +36,29 @@ _ASSERTION_ROW = f"""
   {_DISEASE} {_THERAPIES} therapyInteractionType {_MP_REF} summary
 """
 
+# CIViC's per-profile evidence counters lag its live list (MP12: 96 vs 97 accepted), so
+# get_molecular_profile counts the list itself: one aliased totalCount per status/type.
+_EV = "evidenceItems(molecularProfileId: $molecular_profile_id, status: {s}{t}) {{ totalCount }}"
+_TYPES = ("PREDICTIVE", "DIAGNOSTIC", "PROGNOSTIC", "ONCOGENIC", "FUNCTIONAL", "PREDISPOSING")
+_LIVE_COUNTS = "\n".join(
+    [
+        f"  status_{s.lower()}: " + _EV.format(s=s, t="")
+        for s in ("ACCEPTED", "SUBMITTED", "REJECTED")
+    ]
+    + [
+        f"  accepted_{t.lower()}: " + _EV.format(s="ACCEPTED", t=f", evidenceType: {t}")
+        for t in _TYPES
+    ]
+)
+
 MP_GET = f"""
 query MpGet($molecular_profile_id: Int!) {{
   molecularProfile(id: $molecular_profile_id) {{
     {_MP_ROW} molecularProfileScore description link
     variants {{ __typename id name feature {{ id name }} }}
-    evidenceCountsByStatus {{ acceptedCount submittedCount rejectedCount }}
-    evidenceCountsByType {{
-      predictiveCount diagnosticCount prognosticCount oncogenicCount functionalCount
-      predisposingCount
-    }}
     assertions(first: 100) {{ totalCount nodes {{ {_ASSERTION_ROW} }} }}
   }}
+{_LIVE_COUNTS}
 }}
 """
 
@@ -129,7 +140,8 @@ query AssertionGet($assertion_id: Int!) {{
   assertion(id: $assertion_id) {{
     {_ASSERTION_ROW} description link
     phenotypes {{ hpoId name }}
-    evidenceItemsCount evidenceItems {{ id name }}
+    evidenceItemsCount
+    evidenceItems {{ id name status evidenceLevel {_MP_REF} source {{ sourceType citationId }} }}
   }}
 }}
 """
