@@ -19,7 +19,7 @@ curl -sf "${URL%/mcp}/health" >/dev/null || { echo "server not reachable at $URL
 agy mcp add "$NAME" "$URL" >/dev/null
 
 # One session per agent at a time (3 concurrent): prompts run in sequence, agents in parallel.
-for agent in claude codex agy; do
+for agent in ${AGENTS:-claude codex agy}; do  # AGENTS="claude agy" when one is unavailable
   ( for task in $TASKS; do ${SLOT:-} "$HERE/agent_ux_session.sh" "$agent" "$task" "$OUT" "$URL"; done ) &
 done
 wait
