@@ -73,6 +73,8 @@ def _page_args(limit: int, offset: int, maximum: int) -> None:
 
 
 _PAGING_FIELDS = {"first": "limit", "after": "offset"}
+#: An unknown ID's own browse tool (no arguments needed); profiles/variants need a query.
+_BROWSE = {"evidence_id": ("search_evidence_items",), "assertion_id": ("search_assertions",)}
 
 
 def _named(**values: Any) -> dict[str, Any]:
@@ -274,7 +276,7 @@ class CivicService:
             f"No CIViC {what} has this `{field}`.",
             field=field,
             hint="Find IDs with search_molecular_profiles(query) or get_gene(gene).",
-            next_commands=[cmd("search_molecular_profiles", query="BRAF V600E")],
+            next_commands=[cmd(t) for t in _BROWSE.get(field, ())],
         )
 
     async def get_variant(self, variant_id: int) -> dict[str, Any]:

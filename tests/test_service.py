@@ -141,6 +141,9 @@ async def test_unknown_ids_are_not_found_naming_the_parameter(
         with pytest.raises(NotFoundError) as err:
             await call
         assert err.value.extra["field"] == field
+        # never a canned example search unrelated to the ID that missed
+        steps = err.value.extra["next_commands"]
+        assert all("BRAF V600E" not in str(step) for step in steps)
 
 
 async def test_variant_labels_every_coordinate_with_its_assembly(
