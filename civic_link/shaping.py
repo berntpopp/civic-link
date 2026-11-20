@@ -13,6 +13,7 @@ import base64
 import csv
 import io
 import re
+from datetime import UTC, datetime
 from typing import Any
 
 from civic_link.mcp.untrusted_content import fence_untrusted_text
@@ -62,6 +63,18 @@ ROUTER_ONLY = (
 NAME_MATCH = (
     "name filter: matches every CIViC name containing it (rows carry each DOID / NCIt); "
     "a DOID or NCIt code matches that one term exactly, without its subtypes"
+)
+CODE_MATCH = "code filter: matches that one DOID / NCIt term exactly, without its subtypes"
+NO_ACCEPTED = (
+    "No accepted CIViC evidence for this profile; {n} submitted or rejected (unreviewed or "
+    "refused) items exist, see search_evidence_items(status=ALL). This is not a statement "
+    "that the variant is not actionable or not oncogenic."
+)
+MP_MISS_HINT = (
+    "Search by gene and variant as CIViC names them (BRAF V600E), a ClinGen CAID (CA123643), "
+    "a ClinVar variation ID (376069) or an HGVS string. get_gene lists every variant CIViC "
+    "curates for a gene. No CIViC profile is not evidence that a variant is benign or not "
+    "actionable."
 )
 COUNTS_NOTE = (
     "Row evidence counts are CIViC's cached per-profile counters and can lag the live list "
@@ -382,3 +395,16 @@ def gene_detail(raw: dict[str, Any], *, first_page: bool) -> dict[str, Any]:
         "description": fence(raw.get("description"), str(raw.get("name"))) if first_page else None,
         "url": SITE + str(raw.get("link") or ""),
     }
+
+
+def profile_note(counts: dict[str, Any]) -> str:
+    """Why a profile has no accepted assertion: accepted evidence, only unreviewed, or none."""
+    unreviewed = (counts["submitted"] or 0) + (counts["rejected"] or 0)
+    if counts["accepted"]:
+        return NO_ASSERTION
+    return NO_ACCEPTED.format(n=unreviewed) if unreviewed else NO_EVIDENCE
+
+
+def now_iso() -> str:
+    """UTC now, second precision, ``Z`` suffix."""
+    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")

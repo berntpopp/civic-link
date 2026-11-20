@@ -49,7 +49,9 @@ def _fixture_for(op: str, v: dict[str, Any]) -> str:
             return "mp_search_caid"
         return "mp_search_variant12" if v.get("variant_id") == 12 else "mp_search_none"
     if op == "MpGet":
-        return {12: "mp_get_12", 79: "mp_get_79"}.get(v["molecular_profile_id"], "mp_get_missing")
+        return {12: "mp_get_12", 79: "mp_get_79", 885: "mp_get_885"}.get(
+            v["molecular_profile_id"], "mp_get_missing"
+        )
     if op == "VariantGet":
         return "variant_get_12" if v["variant_id"] == 12 else "variant_get_missing"
     if op == "EvidenceSearch":

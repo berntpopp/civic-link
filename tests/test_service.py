@@ -11,7 +11,7 @@ import respx
 from civic_link.api.client import GRAPHQL_PATH
 from civic_link.exceptions import AmbiguousQueryError, InvalidInputError, NotFoundError
 from civic_link.service import CivicService
-from civic_link.shaping import NAME_MATCH
+from civic_link.shaping import CODE_MATCH, NAME_MATCH, NO_ACCEPTED
 
 
 def _sent(router: respx.MockRouter, op: str) -> list[dict[str, object]]:
@@ -37,7 +37,7 @@ async def test_name_search_keeps_complex_profiles_out_of_the_simple_answer(
 async def test_protein_prefix_in_a_name_query_is_dropped(civic_service: CivicService) -> None:
     out = await civic_service.search_molecular_profiles("BRAF p.V600E", 25, 0)
     assert out["exact_match"] == {"id": 12, "name": "BRAF V600E"}
-    assert out["query"] == "BRAF V600E"
+    assert out["query"] == "BRAF p.V600E" and out["query_normalized"] == "BRAF V600E"
     assert "cached" in out["counts_note"]
 
 
@@ -115,6 +115,12 @@ async def test_profile_without_assertions_says_no_civic_evidence_not_not_actiona
     out = await civic_service.get_molecular_profile(79)  # KRAS G12D: EIDs, no assertion
     assert out["assertions"] == []
     assert out["evidence_note"].startswith("No accepted CIViC assertion")
+
+
+async def test_unreviewed_evidence_only_is_not_no_evidence(civic_service: CivicService) -> None:
+    out = await civic_service.get_molecular_profile(885)  # KRAS G13C: 4 submitted, 1 rejected
+    assert out["evidence_note"] == NO_ACCEPTED.format(n=5)
+    assert out["evidence_note"].startswith("No accepted CIViC evidence")
 
 
 async def test_unknown_ids_are_not_found_naming_the_parameter(
@@ -204,7 +210,7 @@ async def test_disease_and_therapy_filters_never_match_silently(
     sent = _sent(mocked_civic, "EvidenceSearch")[-1]
     assert sent["disease_id"] == 7 and sent["therapy_name"] == "Vemurafenib"
     # a name widens silently (Melanoma also matches Skin Melanoma): say so; a code is exact
-    assert out["match_notes"] == {"therapy": NAME_MATCH}
+    assert out["match_notes"] == {"disease": CODE_MATCH, "therapy": NAME_MATCH}
     out = await civic_service.search_evidence_items(disease="Melanoma")
     assert out["match_notes"] == {"disease": NAME_MATCH}
 

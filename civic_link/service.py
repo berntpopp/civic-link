@@ -10,7 +10,6 @@ silent empty list. A genuinely empty evidence answer is a success that says
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime
 from typing import Any
 
 from civic_link import queries as Q
@@ -20,15 +19,16 @@ from civic_link.mcp.next_commands import cmd
 from civic_link.shaping import (
     CAID,
     CLINVAR,
+    CODE_MATCH,
     COMPLEX_NOTE,
     COUNTS_NOTE,
     DOID_RE,
     FOREIGN_GENE,
     HGVS,
+    MP_MISS_HINT,
     NAME_MATCH,
     NCBI_GENE,
     NCIT_RE,
-    NO_ASSERTION,
     NO_EVIDENCE,
     NOT_A_REPORT,
     P_DOT,
@@ -47,7 +47,9 @@ from civic_link.shaping import (
     hgvs_key,
     mp_detail,
     mp_row,
+    now_iso,
     page_block,
+    profile_note,
     variant_detail,
     variant_index,
 )
@@ -60,10 +62,6 @@ MP_DEFAULT_LIMIT = 25
 GENE_DEFAULT_LIMIT = 50
 VARIANT_INDEX_PATH = "/downloads/nightly/nightly-VariantSummaries.tsv"
 VARIANT_INDEX_TTL_S = 86_400.0
-
-
-def _now() -> str:
-    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _page_args(limit: int, offset: int, maximum: int) -> None:
@@ -95,7 +93,7 @@ class CivicService:
         return next((n for n in names if n and n != "nightly"), None)
 
     async def _stamp(self, payload: dict[str, Any]) -> dict[str, Any]:
-        now = _now()
+        now = now_iso()
         payload["data_version"] = f"CIViC {await self.release()}; live:{now}"
         payload["retrieved_at"] = now
         payload["disclaimer"] = NOT_A_REPORT
@@ -188,8 +186,7 @@ class CivicService:
             if hits:
                 variant_id = variables["variant_id"] = hits[0]["variant_id"]
         else:
-            term = P_DOT.sub("", term)
-            kind, variables["name"] = "name", term
+            kind, variables["name"] = "name", P_DOT.sub("", term)
         found: dict[str, Any] = {}
         if kind == "name" or "caid" in variables or variant_id is not None:
             found = (await self.client.graphql(Q.MP_SEARCH, variables, fields=_PAGING_FIELDS))[
@@ -199,15 +196,23 @@ class CivicService:
         if total == 0:
             raise self._mp_miss(term, kind)
         rows = [mp_row(n) for n in found.get("nodes") or []]
+        name = variables.get("name", term)
         payload: dict[str, Any] = {
             "query": term,
+            **(
+                {"query_normalized": variables["name"]}
+                if variables.get("name", term) != term
+                else {}
+            ),
             "query_type": kind,
-            "exact_match": self._exact(term, kind, found.get("nodes") or [], variant_id),
+            "exact_match": self._exact(name, kind, found.get("nodes") or [], variant_id),
             "simple": [r for r in rows if r["kind"] == "simple"],
             "complex": [r for r in rows if r["kind"] == "complex"],
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
             "counts_note": COUNTS_NOTE,
         }
+        if name != term:
+            payload["query_normalized"] = name
         if variant_id is not None:
             payload["variant_id"] = variant_id
         if payload["complex"]:
@@ -230,19 +235,12 @@ class CivicService:
 
     @staticmethod
     def _mp_miss(term: str, kind: str) -> NotFoundError:
-        steps = []
         gene = term.split(" ")[0]
-        if kind == "name" and SYMBOL.fullmatch(gene):
-            steps.append(cmd("get_gene", gene=gene))
+        steps = [cmd("get_gene", gene=gene)] if kind == "name" and SYMBOL.fullmatch(gene) else []
         return NotFoundError(
             "No CIViC molecular profile matches this query.",
             field="query",
-            hint=(
-                "Search by gene and variant as CIViC names them (BRAF V600E), a ClinGen CAID "
-                "(CA123643), a ClinVar variation ID (376069) or an HGVS string. get_gene lists "
-                "every variant CIViC curates for a gene. No CIViC profile is not evidence that "
-                "a variant is benign or not actionable."
-            ),
+            hint=MP_MISS_HINT,
             candidates=[],
             next_commands=steps or [cmd("get_server_capabilities")],
         )
@@ -270,8 +268,7 @@ class CivicService:
         if raw.get("isComplex"):
             payload["complex_note"] = COMPLEX_NOTE
         if not accepted_assertions:
-            has_evidence = detail["accepted_evidence_count"]
-            payload["evidence_note"] = NO_ASSERTION if has_evidence else NO_EVIDENCE
+            payload["evidence_note"] = profile_note(detail["evidence_counts_by_status"])
         return await self._stamp(payload)
 
     @staticmethod
@@ -326,7 +323,11 @@ class CivicService:
             key: rows,
             **page_block(total=total, returned=len(rows), limit=limit, offset=offset),
         }
-        notes = {f: NAME_MATCH for f in ("disease", "therapy") if f"{f}_name" in filters}
+        notes = {
+            f: NAME_MATCH if f"{f}_name" in filters else CODE_MATCH
+            for f in ("disease", "therapy")
+            if f"{f}_name" in filters or f"{f}_id" in filters
+        }
         if notes:
             payload["match_notes"] = notes
         if total == 0:
@@ -454,7 +455,6 @@ class CivicService:
                 allowed_values=["HGNC symbol (BRAF)", "NCBI Gene ID (NCBIGene:673 or 673)"],
                 hint=ROUTER_ONLY.format(tool="hgnc_resolve_symbol"),
                 next_commands=[cmd("hgnc_resolve_symbol", query=value)],
-                recovery_action="reformulate_input",
             )
         entrez = NCBI_GENE.fullmatch(value)
         if not entrez and not SYMBOL.fullmatch(value):
