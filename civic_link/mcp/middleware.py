@@ -149,6 +149,7 @@ class ArgValidationMiddleware(Middleware):
             elif (
                 loc in ("molecular_profile_id", "variant_id")
                 and isinstance(value, str)
+                and not value.strip().isdigit()  # a number is an id, not a name
                 and 2 <= len(value.strip()) <= 200
             ):
                 # a variant *name* where a CIViC ID belongs: resolve it first

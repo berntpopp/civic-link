@@ -203,3 +203,6 @@ async def test_numeric_string_id_names_the_type_not_the_range(facade: Any) -> No
         assert body["_meta"]["next_commands"] == [
             {"tool": tool, "arguments": {**args, "molecular_profile_id": 12}}
         ]
+    # out of range: a different id is a different record, so no guess and no name search
+    res = await _raw(facade, "get_molecular_profile", {"molecular_profile_id": "00"})
+    assert res.is_error is True and res.structured_content["_meta"]["next_commands"] == []
