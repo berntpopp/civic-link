@@ -188,3 +188,18 @@ async def test_significance_enum_covers_civic_vocabulary(facade: Any) -> None:
     prop = tool.input_schema["properties"]["significance"]
     enum = next(b["enum"] for b in prop.get("anyOf", [prop]) if "enum" in b)
     assert set(enum) == set(civic)
+
+
+async def test_numeric_string_id_names_the_type_not_the_range(facade: Any) -> None:
+    """Issue #4: "12" is in range; the message must name the type and offer the int call."""
+    for tool, args in (
+        ("search_assertions", {"molecular_profile_id": "12", "disease": "melanoma"}),
+        ("get_molecular_profile", {"molecular_profile_id": "12"}),
+    ):
+        res = await _raw(facade, tool, args)
+        body = res.structured_content
+        assert res.is_error is True and body["field"] == "molecular_profile_id"
+        assert "between" not in body["message"] and "got a string" in body["message"]
+        assert body["_meta"]["next_commands"] == [
+            {"tool": tool, "arguments": {**args, "molecular_profile_id": 12}}
+        ]

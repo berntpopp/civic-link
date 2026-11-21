@@ -198,12 +198,18 @@ def tool_signature(name: str, schema: Mapping[str, Any]) -> str:
 def corrected_value(loc: str, value: Any, field_schema: Mapping[str, Any]) -> Any:
     """The unambiguous fix for a rejected value, or ``None``.
 
-    An integer outside its range is clamped to the nearest bound.
+    An in-range string of decimal digits for an integer field is that integer; an integer
+    outside its range is clamped to the nearest bound.
     """
+    nodes = [field_schema, *field_schema.get("anyOf", [])]
+    lo = next((n["minimum"] for n in nodes if "minimum" in n), None)
+    hi = next((n["maximum"] for n in nodes if "maximum" in n), None)
+    if isinstance(value, str) and value.isascii() and value.isdigit() and len(value) <= 18:
+        number = int(value)
+        in_range = (lo is None or number >= lo) and (hi is None or number <= hi)
+        # an out-of-range id is another record, so no guess for it
+        return number if in_range and _primary_type(field_schema)[0] == "integer" else None
     if isinstance(value, int) and not isinstance(value, bool):
-        nodes = [field_schema, *field_schema.get("anyOf", [])]
-        lo = next((n["minimum"] for n in nodes if "minimum" in n), None)
-        hi = next((n["maximum"] for n in nodes if "maximum" in n), None)
         if hi is not None and value > hi:
             return hi
         if lo is not None and value < lo:
