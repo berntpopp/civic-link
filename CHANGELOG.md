@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-21
+
+### Fixed
+
+- A numeric string for an integer argument (`molecular_profile_id: "12"`) was rejected as
+  "must be between 1 and 2147483647", a range it is inside. A wrong JSON type now names the
+  type ("expects an integer, e.g. 12; got a string"), and an in-range digit string gets the
+  integer call in `_meta.next_commands`. The schema is unchanged: these arguments stay
+  integers (#4).
+
 ## [0.1.1] - 2026-11-20
 
 Fixes from the agent UX evaluation (`docs/benchmarks/agent-ux-results.md`). No tool or

@@ -36,6 +36,18 @@ from civic_link.mcp.next_commands import cmd
 logger = logging.getLogger(__name__)
 
 
+#: Python type of a decoded JSON argument -> its JSON name, for a type-error message.
+_JSON_TYPE = {
+    str: "a string",
+    bool: "a boolean",
+    float: "a number",
+    list: "an array",
+    dict: "an object",
+    type(None): "null",
+    int: "an integer",
+}
+
+
 class ArgValidationMiddleware(Middleware):
     """Reshape argument-binding errors into the envelope and apply argument aliases."""
 
@@ -104,9 +116,16 @@ class ArgValidationMiddleware(Middleware):
         constraints = None
         if loc in valid and error_type not in ("missing", "missing_argument"):
             field_schema = schema.get("properties", {}).get(loc, {})
-            constraints = describe_constraints(field_schema) or describe_type_expectation(
-                field_schema
-            )
+            # a wrong JSON type on a plain field ("12" for an integer) is a type error,
+            # not a range one -- naming the range would send the caller in circles (#4)
+            if error_type.endswith("_type") and len(parts) == 1:
+                expected = describe_type_expectation(field_schema)
+                got = _JSON_TYPE.get(type(arguments.get(loc)), "value of another type")
+                constraints = expected and (expected[0], f"{expected[1]}; got {got}")
+            else:
+                constraints = describe_constraints(field_schema) or describe_type_expectation(
+                    field_schema
+                )
         suggestion = did_you_mean(loc, valid) if loc not in valid else None
         envelope = build_arg_error_envelope(
             tool_name=name,
@@ -130,6 +149,7 @@ class ArgValidationMiddleware(Middleware):
             elif (
                 loc in ("molecular_profile_id", "variant_id")
                 and isinstance(value, str)
+                and not value.strip().isdigit()  # a number is an id, not a name
                 and 2 <= len(value.strip()) <= 200
             ):
                 # a variant *name* where a CIViC ID belongs: resolve it first
