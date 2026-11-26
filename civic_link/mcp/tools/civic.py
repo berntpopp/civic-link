@@ -10,7 +10,7 @@ from pydantic import Field, StrictInt
 from civic_link.api.client import FETCH_TIMES
 from civic_link.mcp.annotations import READ_ONLY_OPEN_WORLD
 from civic_link.mcp.envelope import McpErrorContext, ToolReturn, as_result, run_mcp_tool
-from civic_link.mcp.next_commands import cmd
+from civic_link.mcp.next_commands import cmd, safe_echo
 from civic_link.mcp.service_adapters import get_civic_service
 from civic_link.service import (
     DEFAULT_LIMIT,
@@ -76,8 +76,8 @@ def _num(value: int | str) -> int:
 
 
 def _paged(payload: dict[str, Any], tool: str, args: dict[str, Any]) -> list[dict[str, Any]]:
-    """Next page first when truncated."""
-    if payload.get("next_offset") is not None:
+    """Next page first when truncated; omitted when a repeated argument fails ``safe_echo``."""
+    if payload.get("next_offset") is not None and all(map(safe_echo, args.values())):
         return [cmd(tool, **{**args, "offset": payload["next_offset"]})]
     return []
 

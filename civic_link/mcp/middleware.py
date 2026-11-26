@@ -31,7 +31,7 @@ from civic_link.mcp.arg_help import (
     tool_signature,
 )
 from civic_link.mcp.envelope import build_arg_error_envelope
-from civic_link.mcp.next_commands import cmd
+from civic_link.mcp.next_commands import cmd, safe_echo
 
 logger = logging.getLogger(__name__)
 
@@ -139,23 +139,15 @@ class ArgValidationMiddleware(Middleware):
         if constraints is not None:
             fixed = corrected_value(loc, arguments.get(loc), field_schema)
             # Echo only real parameters, and only when nothing in them needs sanitising.
+            # A name in an ID slot is never forwarded to another tool (GTS-CORE-TXT-04).
             known = {k: v for k, v in arguments.items() if k in valid}
             blob = json.dumps(known, ensure_ascii=False, default=str)
-            value = arguments.get(loc)
-            if sanitize_message(blob) != blob:
-                pass  # never echo unsanitised caller text
-            elif fixed is not None:
-                envelope["_meta"]["next_commands"] = [cmd(name, **{**known, loc: fixed})]
-            elif (
-                loc in ("molecular_profile_id", "variant_id")
-                and isinstance(value, str)
-                and not value.strip().isdigit()  # a number is an id, not a name
-                and 2 <= len(value.strip()) <= 200
+            if (
+                fixed is not None
+                and sanitize_message(blob) == blob
+                and all(map(safe_echo, known.values()))
             ):
-                # a variant *name* where a CIViC ID belongs: resolve it first
-                envelope["_meta"]["next_commands"] = [
-                    cmd("search_molecular_profiles", query=value.strip())
-                ]
+                envelope["_meta"]["next_commands"] = [cmd(name, **{**known, loc: fixed})]
         # ``loc`` is a caller-controlled argument name; code-point-strip it before
         # it reaches the log sink (no raw control/zero-width/bidi/NUL in logs).
         logger.warning(
