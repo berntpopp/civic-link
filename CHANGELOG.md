@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-26
+
+### Added
+
+- Paged tools (`search_molecular_profiles`, `search_evidence_items`, `search_assertions`,
+  `get_gene`) report `_meta.pagination` with `total_count`, `has_more`, `next_cursor` (always
+  `null`: paging is by offset) and `next_offset` (Response-Envelope Standard v1 §5). The
+  top-level `total`, `truncated` and `next_offset` are unchanged.
+
 ## [0.2.0] - 2026-11-26
 
 ### Added
