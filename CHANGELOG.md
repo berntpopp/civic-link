@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-26
+
+### Fixed
+
+- `_meta.next_commands` no longer carries the caller's unvalidated input (GTS-CORE-TXT-04): an unmatched `disease` name in `search_evidence_items` and `search_assertions` now points to `get_server_capabilities` (only a validated DOID is still forwarded to `mondo_resolve_disease`), a variant name in an ID slot is no longer forwarded to `search_molecular_profiles`, and page and corrected-call steps that repeat the caller's call are omitted when a repeated value exceeds 200 characters or contains control/format characters.
+
 ## [0.3.0] - 2026-11-26
 
 ### Added

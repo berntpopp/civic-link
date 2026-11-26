@@ -128,7 +128,7 @@ class CivicService:
                     "Give a DOID (DOID:1909) or a disease name as CIViC writes it (Melanoma). "
                     + ROUTER_ONLY.format(tool="mondo_resolve_disease")
                 ),
-                next_commands=[cmd("mondo_resolve_disease", query=disease.strip())],
+                next_commands=[cmd("mondo_resolve_disease", query=match[0])] if match else [],
             )
         if match:
             return {"disease_id": found["nodes"][0]["id"]}
