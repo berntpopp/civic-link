@@ -40,11 +40,9 @@ async def test_braf_v600e_acceptance_path(facade: Any, call_tool: Any) -> None:
         "arguments": {"molecular_profile_id": 12},
     }
     evidence = await call_tool(facade, "search_evidence_items", {"molecular_profile_id": 12})
-    assert evidence["total"] == 97 and {e["status"] for e in evidence["evidence_items"]} == {
-        "ACCEPTED"
-    }
+    assert evidence["total"] == 97 and {e["status"] for e in evidence["results"]} == {"ACCEPTED"}
     assertions = await call_tool(facade, "search_assertions", {"molecular_profile_id": 12})
-    aid10 = next(a for a in assertions["assertions"] if a["id"] == 10)
+    aid10 = next(a for a in assertions["results"] if a["id"] == 10)
     assert aid10["actionability"]["amp_tier_level"] == "TIER_I_LEVEL_A"
 
 
@@ -60,9 +58,9 @@ async def test_assertion_and_evidence_ids_accept_civic_prefixes(
 ) -> None:
     for ref in (10, "10", "AID10", "aid10"):
         out = await call_tool(facade, "get_assertion", {"assertion_id": ref})
-        assert out["assertion"]["id"] == 10
+        assert out["result"]["id"] == 10
     out = await call_tool(facade, "get_evidence_item", {"evidence_id": "EID95"})
-    assert out["evidence_item"]["source"]["citation_id"] == "24583796"
+    assert out["result"]["source"]["citation_id"] == "24583796"
 
 
 async def test_malformed_prefixed_id_names_the_argument_and_its_forms(facade: Any) -> None:
@@ -141,11 +139,11 @@ async def test_capabilities_and_diagnostics(facade: Any, call_tool: Any) -> None
 async def test_descriptions_name_only_returned_fields(facade: Any, call_tool: Any) -> None:
     """Contract truth: the fields a description promises are in the response."""
     found = await call_tool(facade, "search_molecular_profiles", {"query": "BRAF V600E"})
-    assert {"exact_match", "simple", "complex"} <= set(found)
-    assert {"id", "name", "accepted_evidence_count"} <= set(found["simple"][0])
+    assert "exact_match" in found and {"simple", "complex"} <= set(found["result"])
+    assert {"id", "name", "accepted_evidence_count"} <= set(found["result"]["simple"][0])
     mp = await call_tool(facade, "get_molecular_profile", {"molecular_profile_id": 79})
     assert {"evidence_note", "assertions"} <= set(mp)
-    variant = (await call_tool(facade, "get_variant", {"variant_id": 12}))["variant"]
+    variant = (await call_tool(facade, "get_variant", {"variant_id": 12}))["result"]
     assert {"coordinates", "hgvs_genomic", "mane_select_hgvs", "caid", "clinvar_ids"} <= set(
         variant
     )

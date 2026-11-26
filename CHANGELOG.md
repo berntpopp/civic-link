@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-26
+
+### Added
+
+- Response-Envelope Standard v1.2: every successful data result carries `_meta.source`,
+  `_meta.data_version` (the latest monthly CIViC release, e.g. `01-Nov-2026`) and
+  `_meta.retrieved_at` (UTC time of the oldest upstream fetch behind the result; a cache hit
+  and the nightly variant index keep the time of their fetch).
+- Schema tests: every data tool result is validated against the vendored
+  `envelope-v1.2.schema.json` (genefoundry-envelope v1.2.0, sha256-pinned).
+
+### Changed
+
+- **Breaking:** the primary payload key is now `results` (`search_evidence_items`,
+  `search_assertions`) or `result` (`get_molecular_profile`, `get_variant`,
+  `get_evidence_item`, `get_assertion`, `get_gene`), per Response-Envelope Standard v1 §1. It
+  was `evidence_items`, `assertions`, `molecular_profile`, `variant`, `evidence_item`,
+  `assertion` and `gene`. `search_molecular_profiles` returns its `simple` and `complex`
+  lists inside `result`.
+- Re-vendored `tests/conformance/behaviour.py` from genefoundry-router (v1.2 provenance check).
+
+### Deprecated
+
+- The top-level `data_version` and `retrieved_at` of a data result. Read them from `_meta`;
+  the top-level copies will be removed in the next minor release.
+
 ## [0.1.2] - 2026-11-21
 
 ### Fixed

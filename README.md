@@ -95,8 +95,8 @@ search_evidence_items(molecular_profile_id=12)      → 97 accepted evidence ite
 
 **Source.** The CIViC GraphQL API at `https://civicdb.org/api/graphql`, plus the nightly
 variant summary on the same host (HGVS and ClinVar lookups). No key is needed. Only
-`civicdb.org` is ever contacted. Each payload carries
-`data_version` (`CIViC <latest monthly release>; live:<timestamp>`) and `retrieved_at`.
+`civicdb.org` is ever contacted. Each data result states
+`source`, `data_version` (the latest monthly release) and `retrieved_at` in `_meta`.
 
 **Rate limit.** CIViC publishes no request limit. The default is 0.3 s spacing process-wide
 plus a 20,000/UTC-day cap, an in-process cache (15 min), backoff on 429/5xx and an honest

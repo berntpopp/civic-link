@@ -20,6 +20,8 @@ import re
 import time
 from collections import OrderedDict
 from collections.abc import Awaitable, Callable, Mapping
+from contextvars import ContextVar
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -42,6 +44,24 @@ from civic_link.ratelimit import RateLimiter
 
 USER_AGENT = f"civic-link/{__version__} (+https://github.com/berntpopp/civic-link)"
 _RETRY_STATUS = {429, 500, 502, 503, 504}
+
+#: Epoch times of the upstream fetches behind the current tool call; a cache hit reports the
+#: fetch that filled its entry (Response-Envelope v1.2 ``retrieved_at``). The MCP plane resets it.
+FETCH_TIMES: ContextVar[list[float] | None] = ContextVar("civic_fetch_times", default=None)
+
+
+def note_fetch(fetched_at: float) -> None:
+    """Count an upstream fetch at epoch ``fetched_at`` towards the current call."""
+    times = FETCH_TIMES.get()
+    if times is not None:
+        times.append(fetched_at)
+
+
+def retrieved_at() -> str:
+    """UTC time (``Z``) of the oldest upstream fetch behind this call; now when untracked."""
+    times = FETCH_TIMES.get()
+    when = datetime.fromtimestamp(min(times), UTC) if times else datetime.now(UTC)
+    return when.isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _retry_after(response: httpx.Response | None) -> float | None:
@@ -94,8 +114,8 @@ class CivicClient:
             max_redirects=MAX_REDIRECTS,
             event_hooks={"request": [guard]},
         )
-        self._cache: OrderedDict[str, tuple[float, Any]] = OrderedDict()
-        self._inflight: dict[str, asyncio.Future[Any]] = {}
+        self._cache: OrderedDict[str, tuple[float, tuple[Any, float]]] = OrderedDict()
+        self._inflight: dict[str, asyncio.Future[tuple[Any, float]]] = {}
         self.upstream_requests = 0
         self.cache_hits = 0
 
@@ -103,7 +123,7 @@ class CivicClient:
         """Close the underlying HTTP connection pool."""
         await self._http.aclose()
 
-    def _cache_get(self, key: str) -> Any:
+    def _cache_get(self, key: str) -> tuple[Any, float] | None:
         hit = self._cache.get(key)
         if hit is None or hit[0] < time.monotonic():
             self._cache.pop(key, None)
@@ -112,23 +132,27 @@ class CivicClient:
         self.cache_hits += 1
         return hit[1]
 
-    def _cache_put(self, key: str, value: Any) -> None:
+    def _cache_put(self, key: str, value: tuple[Any, float]) -> None:
         self._cache[key] = (time.monotonic() + self.settings.cache_ttl_s, value)
         while len(self._cache) > self.settings.cache_maxsize:
             self._cache.popitem(last=False)
 
     async def _once(self, key: str, fetch: Callable[[], Awaitable[Any]]) -> Any:
-        cached = self._cache_get(key)
-        if cached is not None:
-            return cached
-        # Single-flight: parallel identical calls share one upstream request (politeness).
-        task = self._inflight.get(key)
-        if task is None:
-            task = self._inflight[key] = asyncio.ensure_future(fetch())
-            task.add_done_callback(lambda done: self._settle(key, done))
-        return await asyncio.shield(task)
+        async def timed() -> tuple[Any, float]:
+            return await fetch(), time.time()
 
-    def _settle(self, key: str, task: asyncio.Future[Any]) -> None:
+        hit = self._cache_get(key)
+        if hit is None:
+            # Single-flight: parallel identical calls share one upstream request (politeness).
+            task = self._inflight.get(key)
+            if task is None:
+                task = self._inflight[key] = asyncio.ensure_future(timed())
+                task.add_done_callback(lambda done: self._settle(key, done))
+            hit = await asyncio.shield(task)
+        note_fetch(hit[1])
+        return hit[0]
+
+    def _settle(self, key: str, task: asyncio.Future[tuple[Any, float]]) -> None:
         self._inflight.pop(key, None)
         if not task.cancelled() and task.exception() is None:
             self._cache_put(key, task.result())

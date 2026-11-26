@@ -13,7 +13,6 @@ import base64
 import csv
 import io
 import re
-from datetime import UTC, datetime
 from typing import Any
 
 from civic_link.mcp.untrusted_content import fence_untrusted_text
@@ -407,11 +406,6 @@ def profile_note(counts: dict[str, Any]) -> str:
     if counts["accepted"]:
         return NO_ASSERTION
     return NO_ACCEPTED.format(n=unreviewed) if unreviewed else NO_EVIDENCE
-
-
-def now_iso() -> str:
-    """UTC now, second precision, ``Z`` suffix."""
-    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def level_counts(data: dict[str, Any]) -> dict[str, int]:
