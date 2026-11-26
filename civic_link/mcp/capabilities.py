@@ -67,8 +67,7 @@ def build_capabilities() -> dict[str, Any]:
             "disease": "DOID (DOID:1909) or a CIViC disease name",
             "therapy": "NCIt code (C64768) or a CIViC therapy name",
         },
-        "data_version": "latest monthly CIViC data release + live:<UTC timestamp>, on every "
-        "data payload",
+        "data_version": "latest monthly CIViC data release, in `_meta` of every data result",
         "limits": {
             "per_tool": {
                 "search_molecular_profiles": {

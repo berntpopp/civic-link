@@ -8,7 +8,8 @@ message.
 Every ``_meta`` (success AND error) carries ``tool``, ``request_id``, ``elapsed_ms``,
 ``source = "civic"``, ``capabilities_version``, ``next_commands`` and
 ``unsafe_for_clinical_use = True`` (the fleet-standard research-use disclaimer).
-Data provenance (catalog data_version, retrieved_at, licence) is in the payload.
+Data tools add ``data_version`` and ``retrieved_at`` (Response-Envelope v1.2) and publish
+their payload under ``result``/``results``; see ``mcp/tools/civic.py``.
 """
 
 from __future__ import annotations
@@ -300,6 +301,15 @@ def build_arg_error_envelope(
         "hint": signature,
         "_meta": meta,
     }
+
+
+def as_result(payload: dict[str, Any], key: str | tuple[str, ...]) -> dict[str, Any]:
+    """Publish payload field ``key`` as ``result`` (object) or ``results`` (array), v1 §1.
+
+    A tuple names a group of lists (profiles listed apart), published as one ``result`` object.
+    """
+    value = {k: payload.pop(k) for k in key} if isinstance(key, tuple) else payload.pop(key)
+    return {"results" if isinstance(value, list) else "result": value, **payload}
 
 
 def _stamp_capabilities_version(meta: dict[str, Any]) -> None:

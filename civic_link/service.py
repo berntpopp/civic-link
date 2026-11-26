@@ -13,7 +13,7 @@ import time
 from typing import Any
 
 from civic_link import queries as Q
-from civic_link.api.client import CivicClient
+from civic_link.api.client import CivicClient, note_fetch, retrieved_at
 from civic_link.exceptions import AmbiguousQueryError, InvalidInputError, NotFoundError
 from civic_link.mcp.next_commands import cmd
 from civic_link.shaping import (
@@ -49,7 +49,6 @@ from civic_link.shaping import (
     match_notes,
     mp_detail,
     mp_row,
-    now_iso,
     page_block,
     profile_note,
     variant_detail,
@@ -88,7 +87,7 @@ class CivicService:
     def __init__(self, client: CivicClient) -> None:
         """Bind the service to a rate-limited, cached upstream client."""
         self.client = client
-        self._variant_index: tuple[float, VariantIndex] | None = None
+        self._variant_index: tuple[float, VariantIndex, float] | None = None
 
     async def release(self) -> str | None:
         """Name of the latest monthly CIViC data release (cached), e.g. ``01-Nov-2026``."""
@@ -97,9 +96,9 @@ class CivicService:
         return next((n for n in names if n and n != "nightly"), None)
 
     async def _stamp(self, payload: dict[str, Any]) -> dict[str, Any]:
-        now = now_iso()
-        payload["data_version"] = f"CIViC {await self.release()}; live:{now}"
-        payload["retrieved_at"] = now
+        release = await self.release()  # before the stamp: its fetch counts too
+        payload["retrieved_at"] = now = retrieved_at()
+        payload["data_version"] = f"CIViC {release}; live:{now}"
         payload["disclaimer"] = NOT_A_REPORT
         return payload
 
@@ -109,7 +108,8 @@ class CivicService:
         """CIViC variants carrying a ClinVar ID or HGVS (nightly variant summary)."""
         if self._variant_index is None or self._variant_index[0] < time.monotonic():
             index = variant_index(await self.client.get_text(VARIANT_INDEX_PATH))
-            self._variant_index = (time.monotonic() + VARIANT_INDEX_TTL_S, index)
+            self._variant_index = (time.monotonic() + VARIANT_INDEX_TTL_S, index, time.time())
+        note_fetch(self._variant_index[2])  # the index outlives the client cache entry
         key = hgvs_key(value) if kind == "hgvs" else value
         hits = {h["variant_id"]: h for h in self._variant_index[1][kind].get(key, [])}
         return [hits[k] for k in sorted(hits)]
