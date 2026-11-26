@@ -309,6 +309,13 @@ def as_result(payload: dict[str, Any], key: str | tuple[str, ...]) -> dict[str, 
     A tuple names a group of lists (profiles listed apart), published as one ``result`` object.
     """
     value = {k: payload.pop(k) for k in key} if isinstance(key, tuple) else payload.pop(key)
+    if "truncated" in payload:  # a paged tool: Response-Envelope v1 section 5
+        payload.setdefault("_meta", {})["pagination"] = {
+            "total_count": payload["total"],
+            "has_more": payload["truncated"],
+            "next_cursor": None,  # paging is by offset
+            "next_offset": payload["next_offset"],
+        }
     return {"results" if isinstance(value, list) else "result": value, **payload}
 
 

@@ -73,3 +73,24 @@ async def test_cache_hit_keeps_the_original_fetch_time(
     # the clock moves an hour per reading: an equal stamp can only be the stored fetch time
     assert again["_meta"]["retrieved_at"] == first["_meta"]["retrieved_at"]
     assert first["_meta"]["retrieved_at"].startswith("2027-01-15T")
+
+
+@pytest.mark.parametrize(
+    ("tool", "arguments"),
+    [c for c in DATA_CALLS if c[0].startswith("search_") or c[0] == "get_gene"],
+)
+async def test_paged_tool_reports_meta_pagination(
+    facade: Any, call_tool: Any, tool: str, arguments: dict[str, Any]
+) -> None:
+    out = await call_tool(facade, tool, arguments)
+    assert out["_meta"]["pagination"] == {
+        "total_count": out["total"],
+        "has_more": out["truncated"],
+        "next_cursor": None,
+        "next_offset": out["next_offset"],
+    }
+
+
+async def test_unpaged_tool_has_no_pagination(facade: Any, call_tool: Any) -> None:
+    out = await call_tool(facade, "get_variant", {"variant_id": 12})
+    assert "pagination" not in out["_meta"]
